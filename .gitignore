@@ -18,3 +18,8 @@ obj/
 .gitmodules
 .mcp.json
 .ripgreprc
+*.user
+*.suo
+TestResults/
+.vs/
+*.log
