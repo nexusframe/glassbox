@@ -2,6 +2,7 @@
   <Folder Name="/src/">
     <Project Path="src/Glassbox.Domain/Glassbox.Domain.csproj" />
     <Project Path="src/Glassbox.Adapters/Glassbox.Adapters.csproj" />
+    <Project Path="src/Glassbox.Tools.Mcp/Glassbox.Tools.Mcp.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Glassbox.Tests/Glassbox.Tests.csproj" />
