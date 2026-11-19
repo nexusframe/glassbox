@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\Glassbox.Domain\Glassbox.Domain.csproj" />
+  </ItemGroup>
+</Project>

@@ -11,5 +11,6 @@
   <ItemGroup>
     <Using Include="Xunit" />
     <ProjectReference Include="..\..\src\Glassbox.Domain\Glassbox.Domain.csproj" />
+    <ProjectReference Include="..\..\src\Glassbox.Adapters\Glassbox.Adapters.csproj" />
   </ItemGroup>
 </Project>
