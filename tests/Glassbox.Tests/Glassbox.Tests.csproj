@@ -7,12 +7,14 @@
     <PackageReference Include="xunit" />
     <PackageReference Include="xunit.runner.visualstudio" />
     <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
   </ItemGroup>
   <ItemGroup>
     <Using Include="Xunit" />
     <ProjectReference Include="..\..\src\Glassbox.Domain\Glassbox.Domain.csproj" />
     <ProjectReference Include="..\..\src\Glassbox.Adapters\Glassbox.Adapters.csproj" />
     <PackageReference Include="Microsoft.Extensions.AI.Abstractions" />
+    <ProjectReference Include="..\..\src\Glassbox.Api\Glassbox.Api.csproj" Aliases="api" />
     <ProjectReference Include="..\..\src\Glassbox.Tools.Mcp\Glassbox.Tools.Mcp.csproj" />
   </ItemGroup>
 </Project>
