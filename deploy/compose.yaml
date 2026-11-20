@@ -1,3 +1,10 @@
+# Cap container logs: the server runs on an SD card.
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: "1m"
+    max-file: "3"
+
 services:
   api:
     image: ghcr.io/nexusframe/glassbox-api:latest
@@ -8,6 +15,7 @@ services:
     tmpfs:
       - /tmp
     restart: unless-stopped
+    logging: *logging
     environment:
       ASPNETCORE_ENVIRONMENT: Production
       OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
@@ -33,6 +41,7 @@ services:
     tmpfs:
       - /tmp
     restart: unless-stopped
+    logging: *logging
     networks:
       - glassbox
 
@@ -43,6 +52,7 @@ services:
     environment:
       TUNNEL_TOKEN: ${TUNNEL_TOKEN:-}
     restart: unless-stopped
+    logging: *logging
     networks:
       glassbox:
         ipv4_address: 172.30.0.10
