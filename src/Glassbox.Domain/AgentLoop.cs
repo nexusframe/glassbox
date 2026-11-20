@@ -65,6 +65,10 @@ public sealed class AgentLoop(IComplete model, ICallTool tools, IBudget budget,
         {
             ct.ThrowIfCancellationRequested();
             var response = await ModelTurnAsync(s, turn, history, specs, ct);
+            // No text and no tool calls (e.g. the output budget went to reasoning): an error,
+            // and no empty assistant message in history, which providers may reject later.
+            if (response.ToolCalls.Count == 0 && string.IsNullOrWhiteSpace(response.Text))
+                return RunOutcome.Error;
             history.Add(new AgentMessage(Role.Assistant, response.Text,
                 response.ToolCalls.Count > 0 ? response.ToolCalls : null));
             if (response.ToolCalls.Count == 0) { s.Answer = response.Text; return RunOutcome.Answered; }

@@ -32,6 +32,25 @@ public class AgentLoopTests
 
     private static ModelResponse CallOne(string name = "calculate") => Calls(10, 5, ("c1", name));
 
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("  \n")]
+    public async Task Empty_answer_is_an_error_and_keeps_history_clean(string? text)
+    {
+        // E.g. a reasoning model spends the whole output budget on reasoning and returns no text.
+        var r = new Rig();
+        r.Model.Enqueue(new ModelResponse(text, [], new ModelUsage(10, 600), "m"));
+        var res = await r.RunAsync();
+
+        Assert.Equal(RunOutcome.Error, res.Outcome);
+        Assert.Null(res.Answer);
+        Assert.Equal(TraceStatus.Error, r.Sink.Events.Last().Status);
+        Assert.Single(r.Budget.Added); // the empty turn still costs money
+        // No empty assistant message: providers may reject it on the next request.
+        Assert.DoesNotContain(r.History, m => m.Role == Role.Assistant);
+    }
+
     [Fact]
     public async Task Answers_without_tools()
     {
