@@ -1,0 +1,11 @@
+**/bin/
+**/obj/
+data/
+deploy/.env
+docs/notes/
+.git
+.github
+.superpowers/
+.idea
+.vscode
+TestResults/

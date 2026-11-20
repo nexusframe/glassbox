@@ -1,0 +1,57 @@
+services:
+  api:
+    image: ghcr.io/nexusframe/glassbox-api:latest
+    build:
+      context: ..
+      dockerfile: src/Glassbox.Api/Dockerfile
+    read_only: true
+    tmpfs:
+      - /tmp
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+      Glassbox__TrustedProxies__0: 172.30.0.10/32
+      # Config is a mounted directory; polling keeps reloadOnChange working.
+      DOTNET_USE_POLLING_FILE_WATCHER: "true"
+    volumes:
+      - glassbox-data:/data
+      - ./config:/config:ro
+    ports:
+      - "127.0.0.1:${API_PORT:-8080}:8080"
+    depends_on:
+      - tools
+    networks:
+      - glassbox
+
+  tools:
+    image: ghcr.io/nexusframe/glassbox-tools:latest
+    build:
+      context: ..
+      dockerfile: src/Glassbox.Tools.Mcp/Dockerfile
+    read_only: true
+    tmpfs:
+      - /tmp
+    restart: unless-stopped
+    networks:
+      - glassbox
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    profiles: ["tunnel"]
+    command: tunnel --no-autoupdate run
+    environment:
+      TUNNEL_TOKEN: ${TUNNEL_TOKEN:-}
+    restart: unless-stopped
+    networks:
+      glassbox:
+        ipv4_address: 172.30.0.10
+
+networks:
+  glassbox:
+    ipam:
+      config:
+        - subnet: 172.30.0.0/24
+
+volumes:
+  glassbox-data:
