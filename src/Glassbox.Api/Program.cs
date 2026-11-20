@@ -61,6 +61,14 @@ builder.Services.AddRateLimiter(rl =>
 });
 
 var app = builder.Build();
+{
+    var o = app.Services.GetRequiredService<IOptions<GlassboxOptions>>().Value;
+    var startupLog = app.Services.GetRequiredService<ILoggerFactory>().CreateLogger("Glassbox.Startup");
+    if (ContentLogging.Enabled(o, app.Environment))
+        startupLog.LogWarning("Content logging is ON (Development): prompts, answers and tool data go to the log.");
+    else if (o.LogContent)
+        startupLog.LogWarning("Glassbox:LogContent is ignored outside Development (environment: {Env}).", app.Environment.EnvironmentName);
+}
 app.UseCors();
 app.UseRateLimiter();
 app.MapGet("/health", ChatEndpoint.Health);

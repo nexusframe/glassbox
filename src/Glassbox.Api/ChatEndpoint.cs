@@ -18,7 +18,8 @@ public static class ChatEndpoint
 
     public static async Task<IResult> Post(HttpContext ctx, IOptionsMonitor<GlassboxOptions> monitor,
         IConfiguration config, SessionStore sessions, IComplete model, ICallTool tools,
-        IBudget budget, IPriceTable prices, TimeProvider time, ILogger<AgentLoop> log)
+        IBudget budget, IPriceTable prices, TimeProvider time, ILogger<AgentLoop> log,
+        IHostEnvironment env, ILoggerFactory loggers)
     {
         var o = monitor.CurrentValue;
         if (!ModelCallsOn(o, config)) return Error(503, "paused");
@@ -42,11 +43,20 @@ public static class ChatEndpoint
         if (!session.Lock.Wait(0)) return Error(409, "session_busy");
         try
         {
+            var runId = Guid.NewGuid().ToString("N")[..12];
+            var logContent = ContentLogging.Enabled(o, env);
+            if (logContent)
+            {
+                var content = loggers.CreateLogger("Glassbox.Content");
+                model = new LoggingCompleter(model, content, runId);
+                tools = new LoggingToolCaller(tools, content, runId);
+            }
+            model = new ErrorLoggingCompleter(model, log, runId, withMessage: logContent);
             var loop = new AgentLoop(model, tools, budget, prices,
                 new RunLimits(o.MaxTurns, o.MaxToolCallsPerTurn, TimeSpan.FromSeconds(o.MaxRunSeconds)), time);
             var sink = new NdjsonTraceSink(ctx.Response, session.Id);
             var started = time.GetTimestamp();
-            var result = await loop.RunAsync(Guid.NewGuid().ToString("N")[..12], session.History,
+            var result = await loop.RunAsync(runId, session.History,
                 message, sink, ctx.RequestAborted);
             // Metadata only: never prompt, answer, tool args or results.
             log.LogInformation("run outcome={Outcome} turns={Turns} inputTokens={In} outputTokens={Out} costUsd={Cost} durationMs={Ms}",

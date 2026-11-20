@@ -20,5 +20,7 @@ public sealed class GlassboxOptions
     public string[] AllowedOrigins { get; set; } = [];
     public string[] TrustedProxies { get; set; } = [];
     public bool ModelCallsEnabled { get; set; } = true;
+    // Dev-only: log prompts, answers, tool args and results. Ignored outside Development (ADR 0008).
+    public bool LogContent { get; set; } = false;
     public Dictionary<string, ModelPrice> Prices { get; set; } = [];
 }
