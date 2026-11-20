@@ -101,7 +101,7 @@ public sealed class LazyOpenRouterCompleter(IConfiguration config, IOptionsMonit
             IChatClient client = new OpenAIClient(new ApiKeyCredential(key),
                     new OpenAIClientOptions { Endpoint = new Uri(o.ModelBaseUrl) })
                 .GetChatClient(o.ModelId).AsIChatClient();
-            return _inner = new ChatClientCompleter(client, o.ModelId, o.MaxOutputTokens);
+            return _inner = new RetryOnceCompleter(new ChatClientCompleter(client, o.ModelId, o.MaxOutputTokens));
         }
     }
 }
