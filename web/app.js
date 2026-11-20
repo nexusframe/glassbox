@@ -128,7 +128,7 @@ if (typeof document !== "undefined") (function () {
     document.documentElement.lang = lang;
     document.title = t("title");
     const map = { "t-heading": "heading", "t-sub": "sub", "t-chat": "chat", "t-trace": "trace", "t-samples": "samples",
-      "t-input-label": "inputLabel", "t-privacy": "privacy", "send": "send", "n-q": "nQ", "n-l0": "nL0", "n-ctx": "nCtx",
+      "t-input-label": "inputLabel", "t-privacy": "privacy", "send": "send", "newchat": "newChat", "n-q": "nQ", "n-l0": "nL0", "n-ctx": "nCtx",
       "n-model": "nModel", "n-ans": "nAns", "t-wfstep": "wfStep", "t-wftime": "wfTime", "lg-l0": "lGuard", "lg-model": "nModel",
       "lg-tool": "lTool", "l-turns": "sTurns", "l-tok": "sTokens", "l-cost": "sCost", "l-time": "sTime", "l-bud": "sBudget" };
     for (const id in map) $(id).textContent = t(map[id]);
@@ -153,7 +153,7 @@ if (typeof document !== "undefined") (function () {
 
   function updateControls() {
     const off = running || !live;
-    $("send").disabled = off; $("msg").disabled = off;
+    $("send").disabled = off; $("msg").disabled = off; $("newchat").disabled = off;
     document.querySelectorAll("#samples .chip").forEach(c => { c.disabled = off; });
   }
 
@@ -339,8 +339,12 @@ if (typeof document !== "undefined") (function () {
       case "answer_delta":
         removeTyping();
         if (!run.bot) run.bot = addMsg("bot", "");
-        run.bot.textContent += ev.text || "";
-        $("chat").scrollTop = $("chat").scrollHeight;
+        {
+          // Follow the streamed answer, unless the reader scrolled up to read older messages.
+          const c = $("chat"), atBottom = c.scrollHeight - c.scrollTop - c.clientHeight < 40;
+          run.bot.textContent += ev.text || "";
+          if (atBottom) c.scrollTop = c.scrollHeight;
+        }
         break;
       case "error":
         showError("errRun");
@@ -373,7 +377,7 @@ if (typeof document !== "undefined") (function () {
     if (running || !live) return;
     if (!text) { newRun(); showError("errEmpty"); return; }
     if (text.length > MAX_LEN) { newRun(); showError("errLong"); return; }
-    $("chat").innerHTML = "";
+    // The chat keeps the whole conversation (the server session does too); only the trace panel is per run.
     newRun();
     addMsg("user", text);
     run.typing = document.createElement("div"); run.typing.className = "typing"; run.typing.textContent = t("working");
@@ -457,6 +461,14 @@ if (typeof document !== "undefined") (function () {
   $("lang-en").addEventListener("click", () => setLang("en"));
   $("lang-pl").addEventListener("click", () => setLang("pl"));
   $("form").addEventListener("submit", e => { e.preventDefault(); send($("msg").value); });
+  // New chat: forget the session id (the server then starts an empty history) and clear the chat.
+  $("newchat").addEventListener("click", () => {
+    if (running || !live) return;
+    sessionId = null;
+    $("chat").innerHTML = "";
+    newRun(); setNode("n-q", null); draw();
+    $("msg").focus();
+  });
 
   const saved = store("glassbox.lang");
   lang = saved === "pl" || saved === "en" ? saved : "en";
