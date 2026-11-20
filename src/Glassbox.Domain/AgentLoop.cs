@@ -10,6 +10,7 @@ public sealed record RunResult(RunOutcome Outcome, string? Answer, int Turns,
 public sealed class AgentLoop(IComplete model, ICallTool tools, IBudget budget,
     IPriceTable prices, RunLimits limits, TimeProvider time)
 {
+    private const int MaxResultChars = 500;
     private const string TooMany = "Too many tool calls in one turn.";
 
     private sealed class State(string runId, ITraceSink sink, long start)
@@ -170,7 +171,11 @@ public sealed class AgentLoop(IComplete model, ICallTool tools, IBudget budget,
         {
             Phase = TracePhase.End, ParentId = $"m{turn}", Turn = turn, EndMs = Now(s), Name = name,
             Status = r.IsError ? TraceStatus.Error : TraceStatus.Ok,
+            Text = Clip(r.Content),
         });
+
+    private static string Clip(string text) =>
+        text.Length <= MaxResultChars ? text : text[..MaxResultChars] + "…";
 
     private int Now(State s) => (int)time.GetElapsedTime(s.Start).TotalMilliseconds;
 

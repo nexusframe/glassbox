@@ -147,6 +147,46 @@ public class AgentLoopTests
         Assert.Equal(["c5", "c6"], results.Where(x => x.IsError).Select(x => x.CallId));
     }
 
+    private static TraceEvent ToolEnd(Rig r) =>
+        r.Sink.Events.Single(e => e.Type == TraceType.Tool && e.Phase == TracePhase.End);
+
+    [Fact]
+    public async Task Tool_end_carries_result_text()
+    {
+        var r = new Rig();
+        r.Tools.Returns("calculate", "40.80");
+        r.Model.Enqueue(CallOne()).Enqueue(Say("done"));
+        await r.RunAsync();
+
+        var end = ToolEnd(r);
+        Assert.Equal("40.80", end.Text);
+        Assert.Equal(TraceStatus.Ok, end.Status);
+    }
+
+    [Fact]
+    public async Task Tool_end_carries_error_result_text()
+    {
+        var r = new Rig();
+        r.Tools.On("calculate", (c, _) => Task.FromResult(new ToolResult(c.Id, "Division by zero.", true)));
+        r.Model.Enqueue(CallOne()).Enqueue(Say("done"));
+        await r.RunAsync();
+
+        var end = ToolEnd(r);
+        Assert.Equal("Division by zero.", end.Text);
+        Assert.Equal(TraceStatus.Error, end.Status);
+    }
+
+    [Fact]
+    public async Task Tool_end_truncates_long_result_to_500_chars()
+    {
+        var r = new Rig();
+        r.Tools.Returns("calculate", new string('x', 600));
+        r.Model.Enqueue(CallOne()).Enqueue(Say("done"));
+        await r.RunAsync();
+
+        Assert.Equal(new string('x', 500) + "…", ToolEnd(r).Text);
+    }
+
     [Fact]
     public async Task Blocked_when_budget_is_used()
     {
