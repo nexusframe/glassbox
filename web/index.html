@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Agent trace demo</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <div>
+    <h1 id="t-heading"></h1>
+    <p id="t-sub"></p>
+  </div>
+  <time class="clock" id="clock" aria-label="Local time"></time>
+  <div class="lang" role="group" aria-label="Language">
+    <button type="button" id="lang-en" data-lang="en">EN</button>
+    <button type="button" id="lang-pl" data-lang="pl">PL</button>
+  </div>
+</header>
+
+<div class="banner" id="banner" hidden></div>
+
+<main>
+  <section class="panel">
+    <h2 id="t-chat"></h2>
+    <div class="chat" id="chat"></div>
+    <div class="samples" id="samples"><span class="samples-label" id="t-samples"></span></div>
+    <form class="input" id="form" autocomplete="off">
+      <label for="msg" id="t-input-label"></label>
+      <div class="row">
+        <input id="msg" type="text" maxlength="500">
+        <button type="submit" id="send"></button>
+      </div>
+    </form>
+    <p class="privacy" id="t-privacy"></p>
+  </section>
+
+  <section class="panel">
+    <h2 id="t-trace"></h2>
+    <div class="trace">
+      <div class="flow">
+        <div class="rowf">
+          <span class="node" id="n-q"></span><span class="arr">→</span>
+          <span class="node" id="n-l0"></span><span class="arr">→</span>
+          <span class="node" id="n-ctx"></span>
+        </div>
+        <span class="arr">↓</span>
+        <span class="node" id="n-model"></span>
+        <span class="arr" id="t-callres"></span>
+        <div class="rowf" id="toolnodes"></div>
+        <span class="arr">↓</span>
+        <span class="node" id="n-ans"></span>
+        <span class="loopnote" id="loopnote"></span>
+      </div>
+
+      <div class="wf">
+        <div class="wf-head"><span id="t-wfstep"></span><span id="wf-scale">0 ms</span><span class="ms" id="t-wftime"></span></div>
+        <div id="wf"></div>
+      </div>
+
+      <div class="legend">
+        <span style="--c:var(--l0)" id="lg-l0"></span>
+        <span style="--c:var(--model)" id="lg-model"></span>
+        <span style="--c:var(--tool)" id="lg-tool"></span>
+      </div>
+
+      <div class="summary" id="summary" aria-live="polite">
+        <span><span id="l-turns"></span> <b id="s-turns">0</b></span>
+        <span><span id="l-tok"></span> <b id="s-tok">0</b></span>
+        <span><span id="l-cost"></span> <b id="s-cost">$0.0000</b></span>
+        <span><span id="l-time"></span> <b id="s-time">0 ms</b></span>
+        <span><span id="l-bud"></span> <b id="s-bud">-</b></span>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script src="config.js"></script>
+<script src="i18n.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
