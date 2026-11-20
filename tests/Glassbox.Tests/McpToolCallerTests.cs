@@ -71,8 +71,9 @@ public class McpToolCallerTests
         var (app, ep) = await StartAsync();
         await using var _ = app;
         await using var caller = new McpToolCaller(ep, TimeSpan.FromSeconds(10));
-        var r = await caller.CallAsync(Call("calculate", "{broken"), CancellationToken.None);
+        var r = await caller.CallAsync(Call("calculate", "{\"expression\":\"100*(1+0.05/12"), CancellationToken.None);
         Assert.True(r.IsError);
+        Assert.Equal("Invalid tool arguments: not valid JSON.", r.Content);
     }
 
     [Fact]

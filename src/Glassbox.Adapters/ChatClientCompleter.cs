@@ -2,6 +2,8 @@ using System.Text;
 using System.Text.Json;
 using Glassbox.Domain;
 using Microsoft.Extensions.AI;
+using OpenAI.Chat;
+using ChatMessage = Microsoft.Extensions.AI.ChatMessage;
 
 namespace Glassbox.Adapters;
 
@@ -24,9 +26,22 @@ public sealed class ChatClientCompleter(IChatClient client, string modelId, int 
         var text = new StringBuilder();
         var calls = new List<ToolCall>();
         int input = 0, output = 0;
+        // M.E.AI drops the argument text when it is not valid JSON (Arguments = null, Exception set),
+        // so keep the raw fragments from the OpenAI wire updates, keyed by stream index and call id.
+        var rawByIndex = new Dictionary<int, StringBuilder>();
+        var indexById = new Dictionary<string, int>();
+        var unparsed = new List<(int Position, string CallId)>();
 
         await foreach (var update in client.GetStreamingResponseAsync(messages.Select(ToChatMessage).ToList(), options, ct))
         {
+            if (update.RawRepresentation is StreamingChatCompletionUpdate raw)
+                foreach (var tc in raw.ToolCallUpdates)
+                {
+                    if (!rawByIndex.TryGetValue(tc.Index, out var sb)) rawByIndex[tc.Index] = sb = new StringBuilder();
+                    sb.Append(tc.FunctionArgumentsUpdate?.ToString());
+                    if (!string.IsNullOrEmpty(tc.ToolCallId)) indexById[tc.ToolCallId] = tc.Index;
+                }
+
             foreach (var content in update.Contents)
             {
                 switch (content)
@@ -36,6 +51,7 @@ public sealed class ChatClientCompleter(IChatClient client, string modelId, int 
                         await onTextDelta(t.Text);
                         break;
                     case FunctionCallContent f:
+                        if (f.Exception is not null && f.Arguments is null) unparsed.Add((calls.Count, f.CallId));
                         calls.Add(new ToolCall(f.CallId, f.Name, ArgsToJson(f.Arguments)));
                         break;
                     case UsageContent u:
@@ -45,6 +61,10 @@ public sealed class ChatClientCompleter(IChatClient client, string modelId, int 
                 }
             }
         }
+
+        foreach (var (pos, callId) in unparsed)
+            if (indexById.TryGetValue(callId, out var idx) && rawByIndex.TryGetValue(idx, out var rawText) && rawText.Length > 0)
+                calls[pos] = calls[pos] with { ArgumentsJson = rawText.ToString() };
 
         // Always the configured id: the price table is keyed by it, and a provider may
         // report a different (e.g. dated) id in the response.

@@ -1,8 +1,11 @@
+#pragma warning disable OPENAI001 // OpenAI model factory is evaluation-only; test fakes need it
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using Glassbox.Adapters;
 using Glassbox.Domain;
 using Microsoft.Extensions.AI;
+using OpenAI.Chat;
+using ChatMessage = Microsoft.Extensions.AI.ChatMessage;
 
 namespace Glassbox.Tests;
 
@@ -48,6 +51,38 @@ public class ChatClientCompleterTests
         Assert.Equal(["Hel", "lo", "!"], deltas);
         Assert.Equal("Hello!", r.Text);
         Assert.Empty(r.ToolCalls);
+    }
+
+    private static ChatResponseUpdate RawToolDelta(int index, string? id, string? name, string args) =>
+        new(ChatRole.Assistant, []) { RawRepresentation = OpenAIChatModelFactory.StreamingChatCompletionUpdate(
+            toolCallUpdates: [OpenAIChatModelFactory.StreamingChatToolCallUpdate(index, id, ChatToolCallKind.Function, name,
+                BinaryData.FromString(args))]) };
+
+    [Fact]
+    public async Task Unparseable_arguments_keep_the_raw_text_the_model_sent()
+    {
+        var bad = new FunctionCallContent("call_1", "calculate", null) { Exception = new JsonException("truncated") };
+        var r = await Run(new FakeChatClient(
+            RawToolDelta(0, "call_1", "calculate", "{\"expression\":\"100*(1+"),
+            RawToolDelta(0, null, null, "0.05/12"),
+            new ChatResponseUpdate(ChatRole.Assistant, [bad])), [new(Role.User, "x")]);
+        Assert.Equal("{\"expression\":\"100*(1+0.05/12", Assert.Single(r.ToolCalls).ArgumentsJson);
+    }
+
+    [Fact]
+    public async Task Null_arguments_without_exception_become_empty_object()
+    {
+        var upd = new ChatResponseUpdate(ChatRole.Assistant, [new FunctionCallContent("call_1", "calculate", null)]);
+        var r = await Run(new FakeChatClient(upd), [new(Role.User, "x")]);
+        Assert.Equal("{}", Assert.Single(r.ToolCalls).ArgumentsJson);
+    }
+
+    [Fact]
+    public async Task Unparseable_arguments_without_raw_source_do_not_throw()
+    {
+        var bad = new FunctionCallContent("call_1", "calculate", null) { Exception = new JsonException("x") };
+        var r = await Run(new FakeChatClient(new ChatResponseUpdate(ChatRole.Assistant, [bad])), [new(Role.User, "x")]);
+        Assert.Equal("{}", Assert.Single(r.ToolCalls).ArgumentsJson);
     }
 
     [Fact]
