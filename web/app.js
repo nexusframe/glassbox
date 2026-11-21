@@ -144,6 +144,7 @@ if (typeof document !== "undefined") (function () {
     const a = document.createElement("a"); a.href = "#"; a.textContent = t("fineLink");
     a.addEventListener("click", e => { e.preventDefault(); openGate(); });
     fp.appendChild(a);
+    renderOperator();
     document.querySelectorAll(".lang").forEach(g => g.setAttribute("aria-label", t("lang")));
     document.querySelectorAll("[data-lang]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.lang === lang)));
     buildSamples();
@@ -294,6 +295,21 @@ if (typeof document !== "undefined") (function () {
       p.textContent = n.textContent; st.appendChild(p);
     });
     const go = document.createElement("span"); go.className = "go"; go.textContent = t("traceTab") + " ›"; st.appendChild(go);
+  }
+
+  // RODO: data controller + contact from config.js. Contact is an e-mail or an https:// URL;
+  // anything else is ignored. Empty config (local dev) shows nothing.
+  function renderOperator() {
+    const el = $("g-op"), name = String(window.GLASSBOX_OPERATOR || "").trim(), contact = String(window.GLASSBOX_CONTACT || "").trim();
+    let href = "";
+    if (/^https:\/\/[^\s]+$/i.test(contact)) href = contact;
+    else if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact)) href = "mailto:" + contact;
+    el.textContent = "";
+    if (!name || !href) { el.hidden = true; return; }
+    const a = document.createElement("a"); a.href = href; a.textContent = contact;
+    if (href.startsWith("https:")) { a.target = "_blank"; a.rel = "noopener"; }
+    el.append(t("opLabel") + " " + name + ". " + t("contactLabel") + " ", a);
+    el.hidden = false;
   }
 
   // ----- tabs (phone) -----

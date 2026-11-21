@@ -62,6 +62,8 @@ python3 -m http.server 5500 -d web
 
 Prompt text is not written to disk or logs.
 
+A public instance must name its data controller (RODO/GDPR): set `GLASSBOX_OPERATOR` and `GLASSBOX_CONTACT` (an e-mail or an `https://` URL) in `web/config.js` at deploy time. The first-view notice shows them.
+
 ## How it is built
 
 The code is written with AI coding agents; I read, review and accept every change, and I decide the direction. The ADRs in `docs/` show that work.
