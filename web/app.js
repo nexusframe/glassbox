@@ -113,7 +113,7 @@ if (typeof document !== "undefined") (function () {
     ],
   };
 
-  let lang = "en", sessionId = null, running = false, live = false;
+  let lang = "pl", sessionId = null, running = false, live = false;
   let t0 = 0, timeScale = 1, raf = 0, replayTimers = [];
   let run = null; // per-run state
 
@@ -556,7 +556,7 @@ if (typeof document !== "undefined") (function () {
   });
 
   const saved = store("glassbox.lang");
-  lang = saved === "pl" || saved === "en" ? saved : "en";
+  lang = saved === "pl" || saved === "en" ? saved : "pl";
   setTab("chat");
   applyStatic();
   newRun();
