@@ -35,7 +35,7 @@ the server runs.
 | Risk | Measure |
 |---|---|
 | A container escape reaches the host | Non-root, read-only containers; only the tunnel reaches the Api; the tools server is not exposed |
-| Storage wear | SSD, not an SD card |
+| Storage wear | Runs on the SD card (no SSD at hand; a USB pendrive wears out no slower). Few writes: read-only containers, `/tmp` in RAM, container logs capped at 3 × 1 MB, no prompt text on disk, only the small budget file is written. If the card fails, the page shows the recording until the card is replaced. |
 | The server is offline | Recorded run or video on the page, uptime monitor, VPS fallback |
 | Rate limit sees only the tunnel IP | Key on `CF-Connecting-IP`, trusted only from `cloudflared` |
 | Cloudflare closes long responses (~100 s, documented, not tested) | Max time per run in L0 |
