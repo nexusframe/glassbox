@@ -127,16 +127,27 @@ if (typeof document !== "undefined") (function () {
   function applyStatic() {
     document.documentElement.lang = lang;
     document.title = t("title");
-    const map = { "t-heading": "heading", "t-sub": "sub", "t-chat": "chat", "t-trace": "trace", "t-samples": "samples",
-      "t-input-label": "inputLabel", "t-privacy": "privacy", "send": "send", "newchat": "newChat", "n-q": "nQ", "n-l0": "nL0", "n-ctx": "nCtx",
+    const map = { "t-heading": "heading", "t-chat": "chat", "t-trace": "trace", "t-samples": "samples",
+      "t-input-label": "inputLabel", "send": "send", "newchat": "newChat", "n-q": "nQ", "n-l0": "nL0", "n-ctx": "nCtx",
       "n-model": "nModel", "n-ans": "nAns", "t-wfstep": "wfStep", "t-wftime": "wfTime", "lg-l0": "lGuard", "lg-model": "nModel",
-      "lg-tool": "lTool", "l-turns": "sTurns", "l-tok": "sTokens", "l-cost": "sCost", "l-time": "sTime", "l-bud": "sBudget" };
+      "lg-tool": "lTool", "l-turns": "sTurns", "l-tok": "sTokens", "l-cost": "sCost", "l-time": "sTime", "l-bud": "sBudget",
+      "g-lead": "lead", "g-ai-h": "aiH", "g-ai": "ai", "g-data-h": "dataH", "g-data": "data", "g-cookie-h": "cookieH",
+      "g-cookie": "cookie", "g-start": "start", "tab-chat": "chat", "tab-trace": "traceTab" };
     for (const id in map) $(id).textContent = t(map[id]);
     $("t-callres").textContent = "↓ " + t("calls") + "   ↑ " + t("results");
     $("msg").placeholder = t("placeholder");
-    document.querySelector(".lang").setAttribute("aria-label", t("lang"));
-    ["en", "pl"].forEach(l => $("lang-" + l).setAttribute("aria-pressed", String(l === lang)));
+    $("info").setAttribute("aria-label", t("info")); $("info").title = t("info");
+    $("strip").setAttribute("aria-label", t("openTrace"));
+    $("back").textContent = "‹ " + t("backChat");
+    // Fine print: one short AI line + a link that reopens the full notice.
+    const fp = $("t-privacy"); fp.textContent = t("fine") + " ";
+    const a = document.createElement("a"); a.href = "#"; a.textContent = t("fineLink");
+    a.addEventListener("click", e => { e.preventDefault(); openGate(); });
+    fp.appendChild(a);
+    document.querySelectorAll(".lang").forEach(g => g.setAttribute("aria-label", t("lang")));
+    document.querySelectorAll("[data-lang]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.lang === lang)));
     buildSamples();
+    renderStrip();
     if (run) refreshLabels();
     updateControls();
   }
@@ -169,8 +180,15 @@ if (typeof document !== "undefined") (function () {
     const ts = document.createElement("time"); ts.className = "ts";
     const now = new Date(); ts.dateTime = now.toISOString(); ts.textContent = hms(now);
     d.append(body, ts);
+    $("empty").hidden = true;
     $("chat").appendChild(d); $("chat").scrollTop = $("chat").scrollHeight;
     return body;
+  }
+
+  // Remove all messages; keep (and show) the empty state with the sample questions.
+  function clearChat() {
+    [...$("chat").children].forEach(c => { if (c.id !== "empty") c.remove(); });
+    $("empty").hidden = false;
   }
 
   function tickClock() { const c = $("clock"); if (c) c.textContent = hms(new Date()); }
@@ -260,6 +278,44 @@ if (typeof document !== "undefined") (function () {
       setNode("n-tool-" + name, spans.some(s => s.end === null) ? "on" : "done");
     });
     setNode("n-ans", run.finished && run.status === "ok" ? "done" : null);
+    renderStrip();
+  }
+
+  // Phone live strip: copy the state of the trace nodes into one line of pills.
+  function renderStrip() {
+    const st = $("strip"); if (!st) return;
+    st.textContent = "";
+    const ids = ["n-l0", "n-model"].concat([...document.querySelectorAll("#toolnodes .node")].map(n => n.id), ["n-ans"]);
+    ids.forEach((id, i) => {
+      const n = $(id); if (!n) return;
+      if (i) { const s = document.createElement("span"); s.className = "sep"; s.textContent = "›"; st.appendChild(s); }
+      const p = document.createElement("span");
+      p.className = "pill" + (n.classList.contains("tool") ? " tool" : "") + (n.classList.contains("on") ? " on" : n.classList.contains("done") ? " done" : "");
+      p.textContent = n.textContent; st.appendChild(p);
+    });
+    const go = document.createElement("span"); go.className = "go"; go.textContent = t("traceTab") + " ›"; st.appendChild(go);
+  }
+
+  // ----- tabs (phone) -----
+  function setTab(name) {
+    ["chat", "trace"].forEach(k => {
+      const on = k === name;
+      $("tab-" + k).setAttribute("aria-selected", String(on));
+      $("tab-" + k).tabIndex = on ? 0 : -1;
+      $("p-" + k).classList.toggle("active", on);
+    });
+  }
+
+  // ----- first-view notice (AI Act / RODO / cookies) -----
+  const NOTICE_KEY = "glassbox.notice", NOTICE_VER = "1";
+  function openGate() {
+    $("gate").hidden = false; document.body.classList.add("gated"); $("app").inert = true;
+    $("g-start").focus();
+  }
+  function closeGate() {
+    store(NOTICE_KEY, NOTICE_VER);
+    $("gate").hidden = true; document.body.classList.remove("gated"); $("app").inert = false;
+    if (!$("msg").disabled) $("msg").focus();
   }
 
   function renderSummary(elapsed) {
@@ -418,7 +474,7 @@ if (typeof document !== "undefined") (function () {
   function stopReplay() { replayTimers.forEach(clearTimeout); replayTimers = []; }
   function startReplay() {
     stopReplay();
-    $("chat").innerHTML = "";
+    clearChat();
     newRun();
     addMsg("user", REC.q[lang]);
     run.typing = document.createElement("div"); run.typing.className = "typing"; run.typing.textContent = t("working");
@@ -458,22 +514,37 @@ if (typeof document !== "undefined") (function () {
     } catch { return false; } finally { clearTimeout(timer); }
   }
 
-  $("lang-en").addEventListener("click", () => setLang("en"));
-  $("lang-pl").addEventListener("click", () => setLang("pl"));
+  document.querySelectorAll("[data-lang]").forEach(b => b.addEventListener("click", () => setLang(b.dataset.lang)));
   $("form").addEventListener("submit", e => { e.preventDefault(); send($("msg").value); });
   // New chat: forget the session id (the server then starts an empty history) and clear the chat.
   $("newchat").addEventListener("click", () => {
     if (running || !live) return;
     sessionId = null;
-    $("chat").innerHTML = "";
-    newRun(); setNode("n-q", null); draw();
-    $("msg").focus();
+    clearChat();
+    newRun(); setNode("n-q", null); draw(); renderStrip();
+    setTab("chat"); $("msg").focus();
+  });
+  $("tab-chat").addEventListener("click", () => setTab("chat"));
+  $("tab-trace").addEventListener("click", () => setTab("trace"));
+  $("tabs").addEventListener("keydown", e => {
+    if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+    const next = $("tab-chat").getAttribute("aria-selected") === "true" ? "trace" : "chat";
+    setTab(next); $("tab-" + next).focus();
+  });
+  $("strip").addEventListener("click", () => setTab("trace"));
+  $("back").addEventListener("click", () => setTab("chat"));
+  $("info").addEventListener("click", openGate);
+  $("g-start").addEventListener("click", closeGate);
+  document.addEventListener("keydown", e => {
+    if (e.key === "Escape" && !$("gate").hidden && store(NOTICE_KEY) === NOTICE_VER) closeGate();
   });
 
   const saved = store("glassbox.lang");
   lang = saved === "pl" || saved === "en" ? saved : "en";
+  setTab("chat");
   applyStatic();
   newRun();
   $("loopnote").textContent = "";
+  if (store(NOTICE_KEY) !== NOTICE_VER) openGate();
   health().then(ok => { if (ok) { live = true; updateControls(); } else showOffline(); });
 })();

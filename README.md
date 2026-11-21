@@ -21,7 +21,7 @@ Demo: (link coming soon)
 ## Where it runs
 
 ```text
- recruiter's browser
+ user's browser
         │ opens page                       │ chat: fetch POST (stream)
         ▼                                  ▼
  ┌──────────────────┐            ┌───────────────────┐
@@ -46,7 +46,7 @@ You need Docker. Steps:
 
 ```sh
 cp deploy/.env.example deploy/.env   # then set OPENROUTER_API_KEY
-docker compose -f deploy/compose.yaml up --build -d
+
 curl localhost:8080/health
 ```
 

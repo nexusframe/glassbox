@@ -22,7 +22,7 @@ Decisions and their reasons: `docs/decisions/`.
 ## 2. Where it runs (public demo)
 
 ```text
- recruiter's browser
+ user's browser
         │ opens page                       │ chat: fetch POST (stream)
         ▼                                  ▼
  ┌──────────────────┐            ┌───────────────────┐

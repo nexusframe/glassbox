@@ -20,7 +20,8 @@ limits. Prompts from a public demo are personal data (GDPR).
   `args`).
 - The daily budget counter is the only persisted state (SQLite or a file on
   a volume).
-- One line under the chat tells the user this.
+- A first-view notice (AI Act, RODO, no cookies) tells the user this; a link
+  under the chat reopens it.
 
 ## Alternatives
 

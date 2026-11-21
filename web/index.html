@@ -2,84 +2,122 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Agent trace demo</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>glassbox</title>
 <!-- Bump ?v= when any asset changes (cache busting). -->
-<link rel="stylesheet" href="style.css?v=1">
+<link rel="stylesheet" href="style.css?v=5">
 </head>
 <body>
-<header>
-  <div>
-    <h1 id="t-heading"></h1>
-    <p id="t-sub"></p>
-  </div>
-  <time class="clock" id="clock" aria-label="Local time"></time>
-  <div class="lang" role="group" aria-label="Language">
-    <button type="button" id="lang-en" data-lang="en">EN</button>
-    <button type="button" id="lang-pl" data-lang="pl">PL</button>
-  </div>
-</header>
+<div class="backdrop" aria-hidden="true"></div>
 
-<div class="banner" id="banner" hidden></div>
-
-<main>
-  <section class="panel">
-    <h2 id="t-chat"></h2>
-    <div class="chat" id="chat"></div>
-    <div class="samples" id="samples"><span class="samples-label" id="t-samples"></span></div>
-    <form class="input" id="form" autocomplete="off">
-      <label for="msg" id="t-input-label"></label>
-      <div class="row">
-        <input id="msg" type="text" maxlength="500">
-        <button type="submit" id="send"></button>
-        <button type="button" id="newchat" class="secondary"></button>
-      </div>
-    </form>
-    <p class="privacy" id="t-privacy"></p>
-  </section>
-
-  <section class="panel">
-    <h2 id="t-trace"></h2>
-    <div class="trace">
-      <div class="flow">
-        <div class="rowf">
-          <span class="node" id="n-q"></span><span class="arr">→</span>
-          <span class="node" id="n-l0"></span><span class="arr">→</span>
-          <span class="node" id="n-ctx"></span>
-        </div>
-        <span class="arr">↓</span>
-        <span class="node" id="n-model"></span>
-        <span class="arr" id="t-callres"></span>
-        <div class="rowf" id="toolnodes"></div>
-        <span class="arr">↓</span>
-        <span class="node" id="n-ans"></span>
-        <span class="loopnote" id="loopnote"></span>
-      </div>
-
-      <div class="wf">
-        <div class="wf-head"><span id="t-wfstep"></span><span id="wf-scale">0 ms</span><span class="ms" id="t-wftime"></span></div>
-        <div id="wf"></div>
-      </div>
-
-      <div class="legend">
-        <span style="--c:var(--l0)" id="lg-l0"></span>
-        <span style="--c:var(--model)" id="lg-model"></span>
-        <span style="--c:var(--tool)" id="lg-tool"></span>
-      </div>
-
-      <div class="summary" id="summary" aria-live="polite">
-        <span><span id="l-turns"></span> <b id="s-turns">0</b></span>
-        <span><span id="l-tok"></span> <b id="s-tok">0</b></span>
-        <span><span id="l-cost"></span> <b id="s-cost">$0.0000</b></span>
-        <span><span id="l-time"></span> <b id="s-time">0 ms</b></span>
-        <span><span id="l-bud"></span> <b id="s-bud">-</b></span>
+<!-- First view: title + AI Act / RODO / cookie notice. Shown until accepted (localStorage). -->
+<section class="gate" id="gate" role="dialog" aria-modal="true" aria-labelledby="g-title" hidden>
+  <div class="gate-card glass">
+    <div class="gate-top">
+      <h1 class="mark mark-lg" id="g-title">glassbox</h1>
+      <div class="lang" role="group" aria-label="Language">
+        <button type="button" data-lang="en">EN</button>
+        <button type="button" data-lang="pl">PL</button>
       </div>
     </div>
-  </section>
-</main>
+    <p class="gate-lead" id="g-lead"></p>
+    <ul class="notice">
+      <li><h2 id="g-ai-h"></h2><p id="g-ai"></p></li>
+      <li><h2 id="g-data-h"></h2><p id="g-data"></p></li>
+      <li><h2 id="g-cookie-h"></h2><p id="g-cookie"></p></li>
+    </ul>
+    <!-- TODO before deploy: RODO needs the controller (name) and a contact here. -->
+    <button type="button" class="primary" id="g-start"></button>
+  </div>
+</section>
 
-<script src="config.js?v=1"></script>
-<script src="i18n.js?v=1"></script>
-<script src="app.js?v=1"></script>
+<div class="app" id="app">
+  <header class="topbar">
+    <div class="brand">
+      <span class="mark">glassbox</span>
+      <span class="tagline" id="t-heading"></span>
+    </div>
+    <div class="tools">
+      <time class="clock" id="clock" aria-label="Local time"></time>
+      <button type="button" id="newchat" class="ghost"></button>
+      <div class="lang" role="group" aria-label="Language">
+        <button type="button" data-lang="en">EN</button>
+        <button type="button" data-lang="pl">PL</button>
+      </div>
+      <button type="button" class="ghost icon" id="info" aria-haspopup="dialog">i</button>
+    </div>
+  </header>
+
+  <div class="banner" id="banner" hidden></div>
+
+  <div class="tabs" role="tablist" id="tabs">
+    <button type="button" role="tab" id="tab-chat" aria-controls="p-chat" aria-selected="true"></button>
+    <button type="button" role="tab" id="tab-trace" aria-controls="p-trace" aria-selected="false"></button>
+  </div>
+
+  <main>
+    <section class="panel glass" id="p-chat" role="tabpanel" aria-labelledby="tab-chat">
+      <h2 class="panel-h" id="t-chat"></h2>
+      <div class="chat" id="chat">
+        <div class="empty" id="empty">
+          <p class="empty-h" id="t-samples"></p>
+          <div class="samples" id="samples"></div>
+        </div>
+      </div>
+      <button type="button" class="strip" id="strip" aria-label="Open trace"></button>
+      <form class="input" id="form" autocomplete="off">
+        <label for="msg" class="sr" id="t-input-label"></label>
+        <input id="msg" type="text" maxlength="500" enterkeyhint="send">
+        <button type="submit" class="primary" id="send"></button>
+      </form>
+      <p class="fineprint" id="t-privacy"></p>
+    </section>
+
+    <section class="panel glass" id="p-trace" role="tabpanel" aria-labelledby="tab-trace">
+      <h2 class="panel-h" id="t-trace"></h2>
+      <div class="trace">
+        <div class="flow">
+          <div class="rowf">
+            <span class="node" id="n-q"></span><span class="arr">→</span>
+            <span class="node" id="n-l0"></span><span class="arr">→</span>
+            <span class="node" id="n-ctx"></span>
+          </div>
+          <span class="arr">↓</span>
+          <span class="node" id="n-model"></span>
+          <span class="arr" id="t-callres"></span>
+          <div class="rowf" id="toolnodes"></div>
+          <span class="arr">↓</span>
+          <span class="node" id="n-ans"></span>
+          <span class="loopnote" id="loopnote"></span>
+        </div>
+
+        <div class="wf">
+          <div class="wf-head"><span id="t-wfstep"></span><span id="wf-scale">0 ms</span><span class="ms" id="t-wftime"></span></div>
+          <div id="wf"></div>
+        </div>
+
+        <div class="legend">
+          <span style="--c:var(--l0)" id="lg-l0"></span>
+          <span style="--c:var(--model)" id="lg-model"></span>
+          <span style="--c:var(--tool)" id="lg-tool"></span>
+        </div>
+
+        <div class="summary" id="summary" aria-live="polite">
+          <span><span id="l-turns"></span> <b id="s-turns">0</b></span>
+          <span><span id="l-tok"></span> <b id="s-tok">0</b></span>
+          <span><span id="l-cost"></span> <b id="s-cost">$0.0000</b></span>
+          <span><span id="l-time"></span> <b id="s-time">0 ms</b></span>
+          <span><span id="l-bud"></span> <b id="s-bud">-</b></span>
+        </div>
+      </div>
+      <button type="button" class="strip back" id="back"></button>
+    </section>
+  </main>
+</div>
+
+<script src="config.js?v=5"></script>
+<script src="i18n.js?v=5"></script>
+<script src="app.js?v=5"></script>
 </body>
 </html>
