@@ -2,7 +2,7 @@
 
 Glassbox is an AI agent you can see inside. You chat with it in the browser. Next to the chat, a live panel shows each step the agent takes: the guards, the model calls and the tool calls. The agent loop is our own code, and the tools run on a separate MCP server.
 
-Demo: (link coming soon)
+Demo: <https://glassbox.wasyluk.pl>
 
 ## What the visitor sees
 
