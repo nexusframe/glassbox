@@ -38,7 +38,7 @@ public static class WeatherTool
     private static async Task<string> FetchAsync(string name, HttpClient http, CancellationToken ct)
     {
         var places = await PublicApi.GetJsonAsync(http,
-            $"https://geocoding-api.open-meteo.com/v1/search?name={Uri.EscapeDataString(name)}&count=1&language=en&format=json",
+            $"https://geocoding-api.open-meteo.com/v1/search?name={Uri.EscapeDataString(name)}&count=1&language=pl&format=json",
             Service, ct);
         if (!places.TryGetProperty("results", out var results) || results.GetArrayLength() == 0)
             throw new ArgumentException($"No place named '{name}'. Check the spelling or use the basic form of the name.", "city");

@@ -104,4 +104,14 @@ public class WeatherToolTests
         await Assert.ThrowsAsync<ServiceUnavailableException>(
             () => WeatherTool.CurrentAsync("Kraków", stub.Client(), CancellationToken.None));
     }
+
+    // Open-Meteo matches names in the requested language. With "en", "Warszawa" and "Tokio"
+    // match small places in the USA; with "pl", Polish and English names both find the big city.
+    [Fact]
+    public async Task Searches_place_names_in_polish()
+    {
+        var stub = Stub(Place, Forecast());
+        await WeatherTool.CurrentAsync("Warszawa", stub.Client(), CancellationToken.None);
+        Assert.Contains("language=pl", stub.Requests[0].Query);
+    }
 }
