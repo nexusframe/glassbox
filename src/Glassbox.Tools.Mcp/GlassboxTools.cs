@@ -40,4 +40,14 @@ public sealed class GlassboxTools(TimeProvider time, IHttpClientFactory http)
         try { return await CurrencyTool.ConvertAsync(amount, from, to, http.CreateClient(HttpClientName), ct); }
         catch (Exception e) when (e is ArgumentException or ServiceUnavailableException) { throw new McpException(e.Message); }
     }
+
+    [McpServerTool(Name = "wiki_summary"), Description("Returns the first paragraph of a Wikipedia article. Use for facts about people, places and things. Give the exact article title.")]
+    public async Task<string> WikiSummaryAsync(
+        [Description("Article title, e.g. Kraków")] string title,
+        [Description("Wikipedia language: pl or en")] string language = "en",
+        CancellationToken ct = default)
+    {
+        try { return await WikiTool.SummaryAsync(title, language, http.CreateClient(HttpClientName), ct); }
+        catch (Exception e) when (e is ArgumentException or ServiceUnavailableException) { throw new McpException(e.Message); }
+    }
 }
