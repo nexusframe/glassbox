@@ -6,7 +6,7 @@
 ## Context
 
 The agent needs tools (`calculate`, `get_datetime` in v0; `get_weather`,
-`search_notes` in v1). Tools can live in-process as C# functions, or in a
+`convert_currency`, `wiki_summary` in v1). Tools can live in-process as C# functions, or in a
 separate server that speaks the Model Context Protocol (MCP).
 
 ## Decision

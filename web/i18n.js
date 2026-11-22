@@ -7,7 +7,7 @@ window.GB_I18N = {
     aiH: "You chat with an AI",
     ai: "Answers come from a language model, not a person. They can be wrong, so check important facts.",
     dataH: "What happens to your messages",
-    data: "We send your messages to the model through OpenRouter (a service in the USA). The server keeps the chat in memory for 30 minutes and never writes it to disk. We store only timings, token counts and cost. Do not type personal data.",
+    data: "We send your messages to the model through OpenRouter (a service in the USA). The server keeps the chat in memory for 30 minutes and never writes it to disk. We store only timings, token counts and cost. Do not type personal data. For weather, exchange-rate and Wikipedia questions, our server sends only the place, currency or article name to Open-Meteo, NBP and Wikipedia (Wikimedia, USA); they see our server, not you.",
     cookieH: "No tracking cookies",
     cookie: "We set no cookies and do no tracking. Cloudflare, which serves this page, may set one security cookie (cf_clearance) after a bot check. Your browser also remembers your language and that you saw this notice.",
     opLabel: "Data controller:", contactLabel: "Contact:",
@@ -50,7 +50,7 @@ window.GB_I18N = {
     aiH: "Rozmawiasz z AI",
     ai: "Odpowiedzi pisze model językowy, nie człowiek. Mogą być błędne, więc sprawdzaj ważne fakty.",
     dataH: "Co dzieje się z Twoimi wiadomościami",
-    data: "Wysyłamy wiadomości do modelu przez OpenRouter (usługa w USA). Serwer trzyma rozmowę w pamięci przez 30 minut i nigdy nie zapisuje jej na dysku. Zapisujemy tylko czasy, liczby tokenów i koszt. Nie wpisuj danych osobowych.",
+    data: "Wysyłamy wiadomości do modelu przez OpenRouter (usługa w USA). Serwer trzyma rozmowę w pamięci przez 30 minut i nigdy nie zapisuje jej na dysku. Zapisujemy tylko czasy, liczby tokenów i koszt. Nie wpisuj danych osobowych. Przy pytaniach o pogodę, kursy walut i Wikipedię nasz serwer wysyła tylko nazwę miejsca, waluty lub artykułu do Open-Meteo, NBP i Wikipedii (Wikimedia, USA); widzą one nasz serwer, nie Ciebie.",
     cookieH: "Bez ciasteczek śledzących",
     cookie: "Nie ustawiamy ciasteczek i nie śledzimy Cię. Cloudflare, który dostarcza stronę, może ustawić jedno ciasteczko bezpieczeństwa (cf_clearance) po sprawdzeniu, czy nie jesteś botem. Przeglądarka pamięta też Twój język i to, że ta informacja była pokazana.",
     opLabel: "Administrator danych:", contactLabel: "Kontakt:",
@@ -88,6 +88,6 @@ window.GB_I18N = {
   },
 };
 window.GB_SAMPLES = {
-  en: ["What time is it in Tokyo, and what is 17% of 240?", "What time is it in New York?", "Add 23% VAT to 240, then split it between 3 people."],
-  pl: ["Która godzina jest w Tokio i ile to 17% z 240?", "Która godzina jest w Nowym Jorku?", "Dolicz 23% VAT do 240 i podziel na 3 osoby."],
+  en: ["What's the weather in Kraków, and what time is it in Tokyo?", "How much is 100 USD in PLN with 23% VAT added?", "Who was Maria Skłodowska-Curie? Two sentences."],
+  pl: ["Jaka jest pogoda w Krakowie i która godzina w Tokio?", "Ile to 100 USD w złotych z 23% VAT?", "Kim była Maria Skłodowska-Curie? Dwa zdania."],
 };

@@ -28,4 +28,4 @@ tools make the worst case small.
 ## Consequences
 
 - A future tool with side effects needs a new ADR (confirmation step).
-- `search_notes` data is a public sample set we write, never the owner's private notes.
+- `wiki_summary` returns text written by third parties: the clearest case for this decision.

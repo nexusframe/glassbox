@@ -79,7 +79,8 @@ If the server is down, the page shows a recorded run (v0) or the video (v1) inst
  ─────────────────────────────────────────────────────────────────────
  loop       ✓                         ✓                     v2: subagent
  tools      calculate, get_datetime   + get_weather,        (agent as a
-                                        search_notes          tool)
+                                        convert_currency,     tool)
+                                        wiki_summary
  panel      ✓                         ✓                     v3: notes
  L0 guards  ✓                         ✓                         graph
  tests      contract tests in CI      + evals (real model)

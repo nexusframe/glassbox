@@ -323,7 +323,7 @@ if (typeof document !== "undefined") (function () {
   }
 
   // ----- first-view notice (AI Act / RODO / cookies) -----
-  const NOTICE_KEY = "glassbox.notice", NOTICE_VER = "1";
+  const NOTICE_KEY = "glassbox.notice", NOTICE_VER = "2";
   function openGate() {
     $("gate").hidden = false; document.body.classList.add("gated"); $("app").inert = true;
     $("g-start").focus();
