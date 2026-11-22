@@ -29,4 +29,15 @@ public sealed class GlassboxTools(TimeProvider time, IHttpClientFactory http)
         try { return await WeatherTool.CurrentAsync(city, http.CreateClient(HttpClientName), ct); }
         catch (Exception e) when (e is ArgumentException or ServiceUnavailableException) { throw new McpException(e.Message); }
     }
+
+    [McpServerTool(Name = "convert_currency"), Description("Converts an amount between currencies at the latest NBP (National Bank of Poland) mid rate. Use ISO codes such as PLN, USD, EUR. For further arithmetic on the result, use calculate.")]
+    public async Task<string> ConvertCurrencyAsync(
+        [Description("Amount, e.g. 100")] decimal amount,
+        [Description("ISO code to convert from, e.g. USD")] string from,
+        [Description("ISO code to convert to, e.g. PLN")] string to,
+        CancellationToken ct)
+    {
+        try { return await CurrencyTool.ConvertAsync(amount, from, to, http.CreateClient(HttpClientName), ct); }
+        catch (Exception e) when (e is ArgumentException or ServiceUnavailableException) { throw new McpException(e.Message); }
+    }
 }
