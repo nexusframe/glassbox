@@ -8,6 +8,9 @@ public static class WeatherTool
 {
     private const string Service = "Open-Meteo";
 
+    // One budget for both requests; stays below the MCP client call timeout (10 s).
+    private static readonly TimeSpan DefaultBudget = TimeSpan.FromSeconds(8);
+
     private static readonly Dictionary<int, string> Codes = new()
     {
         [0] = "clear sky", [1] = "mainly clear", [2] = "partly cloudy", [3] = "overcast",
@@ -19,17 +22,26 @@ public static class WeatherTool
         [95] = "thunderstorm", [96] = "thunderstorm with hail", [99] = "thunderstorm with hail",
     };
 
-    public static async Task<string> CurrentAsync(string city, HttpClient http, CancellationToken ct)
+    public static async Task<string> CurrentAsync(string city, HttpClient http, CancellationToken ct, TimeSpan? budget = null)
     {
         var name = city?.Trim() ?? "";
         if (name.Length is 0 or > 100)
             throw new ArgumentException("Give a city name of 1 to 100 characters, e.g. Kraków.", nameof(city));
 
+        using var limit = CancellationTokenSource.CreateLinkedTokenSource(ct);
+        limit.CancelAfter(budget ?? DefaultBudget);
+        try { return await FetchAsync(name, http, limit.Token); }
+        catch (OperationCanceledException) when (!ct.IsCancellationRequested) { throw new ServiceUnavailableException(Service); }
+        catch (Exception e) when (PublicApi.IsUnexpectedAnswer(e)) { throw new ServiceUnavailableException(Service); }
+    }
+
+    private static async Task<string> FetchAsync(string name, HttpClient http, CancellationToken ct)
+    {
         var places = await PublicApi.GetJsonAsync(http,
             $"https://geocoding-api.open-meteo.com/v1/search?name={Uri.EscapeDataString(name)}&count=1&language=en&format=json",
             Service, ct);
         if (!places.TryGetProperty("results", out var results) || results.GetArrayLength() == 0)
-            throw new ArgumentException($"No place named '{name}'. Check the spelling or use the basic form of the name.", nameof(city));
+            throw new ArgumentException($"No place named '{name}'. Check the spelling or use the basic form of the name.", "city");
 
         var place = results[0];
         var lat = place.GetProperty("latitude").GetDouble().ToString(CultureInfo.InvariantCulture);

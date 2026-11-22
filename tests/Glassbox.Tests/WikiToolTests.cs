@@ -67,4 +67,27 @@ public class WikiToolTests
         Assert.Contains("pl or en", ex.Message);
         Assert.Empty(stub.Requests);
     }
+
+    [Fact]
+    public async Task Page_without_extract_throws()
+    {
+        var ex = await Assert.ThrowsAsync<ArgumentException>(() => Summary(Stub(Page("", "no-extract"))));
+        Assert.Contains("has no summary", ex.Message);
+        await Assert.ThrowsAsync<ArgumentException>(() => Summary(Stub("""{"type":"standard","title":"Kraków"}""")));
+    }
+
+    [Fact]
+    public async Task Missing_desktop_url_falls_back_to_request_url()
+    {
+        var result = await Summary(Stub("""{"type":"standard","title":"Kraków","extract":"Miasto.","content_urls":{}}"""));
+        Assert.Contains("URL: https://pl.wikipedia.org/api/rest_v1/page/summary/Krak%C3%B3w", result);
+    }
+
+    [Fact]
+    public async Task Invalid_title_rejected_by_wikipedia_is_an_input_error()
+    {
+        var stub = new StubHttpHandler(_ => StubHttpHandler.Json("{}", HttpStatusCode.BadRequest));
+        var ex = await Assert.ThrowsAsync<ArgumentException>(() => Summary(stub, "[x]"));
+        Assert.Contains("rejected", ex.Message);
+    }
 }

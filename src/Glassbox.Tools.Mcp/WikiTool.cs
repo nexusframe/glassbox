@@ -27,12 +27,24 @@ public static class WikiTool
             throw new ArgumentException($"No Wikipedia article titled '{name}'. Try another title.", nameof(title));
         }
 
-        var found = page.GetProperty("title").GetString();
+        try { return Format(page, name, url); }
+        catch (Exception e) when (PublicApi.IsUnexpectedAnswer(e)) { throw new ServiceUnavailableException(Service); }
+    }
+
+    private static string Format(System.Text.Json.JsonElement page, string name, string url)
+    {
+        var found = page.TryGetProperty("title", out var t) ? t.GetString() : name;
         if (page.TryGetProperty("type", out var type) && type.GetString() == "disambiguation")
             return $"Title '{found}' is ambiguous (disambiguation page). Ask the user which one they mean.";
 
-        var link = page.TryGetProperty("content_urls", out var urls) ? urls.GetProperty("desktop").GetProperty("page").GetString() : url;
-        return $"Title: {found}\nURL: {link}\nSummary: {Cut(page.GetProperty("extract").GetString() ?? "")}";
+        var extract = page.TryGetProperty("extract", out var e) && e.ValueKind == System.Text.Json.JsonValueKind.String ? e.GetString() : null;
+        if (string.IsNullOrWhiteSpace(extract))
+            throw new ArgumentException($"Article '{found}' has no summary. Try another title.", "title");
+
+        var link = page.TryGetProperty("content_urls", out var urls)
+            && urls.TryGetProperty("desktop", out var desktop)
+            && desktop.TryGetProperty("page", out var href) ? href.GetString() : url;
+        return $"Title: {found}\nURL: {link}\nSummary: {Cut(extract)}";
     }
 
     private static string Cut(string text)

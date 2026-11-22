@@ -74,4 +74,34 @@ public class WeatherToolTests
             () => WeatherTool.CurrentAsync("  ", stub.Client(), CancellationToken.None));
         Assert.Empty(stub.Requests);
     }
+
+    [Fact]
+    public async Task Slow_second_request_fails_within_the_tool_budget()
+    {
+        var stub = new StubHttpHandler(async (r, ct) =>
+        {
+            if (!r.RequestUri!.Host.StartsWith("geocoding")) await Task.Delay(Timeout.Infinite, ct);
+            return StubHttpHandler.Json(Place);
+        });
+        var watch = System.Diagnostics.Stopwatch.StartNew();
+        await Assert.ThrowsAsync<ServiceUnavailableException>(() =>
+            WeatherTool.CurrentAsync("Kraków", stub.Client(), CancellationToken.None, TimeSpan.FromMilliseconds(200)));
+        Assert.True(watch.Elapsed < TimeSpan.FromSeconds(3), $"took {watch.Elapsed}");
+    }
+
+    [Fact]
+    public async Task Missing_temperature_maps_to_not_available()
+    {
+        var stub = Stub(Place, """{"current":{"time":"2026-11-22T23:15","temperature_2m":null,"weather_code":3,"wind_speed_10m":6.8}}""");
+        await Assert.ThrowsAsync<ServiceUnavailableException>(
+            () => WeatherTool.CurrentAsync("Kraków", stub.Client(), CancellationToken.None));
+    }
+
+    [Fact]
+    public async Task Not_found_from_open_meteo_maps_to_not_available()
+    {
+        var stub = new StubHttpHandler(_ => StubHttpHandler.Json("{}", HttpStatusCode.NotFound));
+        await Assert.ThrowsAsync<ServiceUnavailableException>(
+            () => WeatherTool.CurrentAsync("Kraków", stub.Client(), CancellationToken.None));
+    }
 }

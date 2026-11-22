@@ -17,6 +17,12 @@ public static class CurrencyTool
         var shown = amount.ToString(CultureInfo.InvariantCulture);
         if (from == to) return $"{shown} {from} = {Format(amount)} {to}";
 
+        try { return await FetchAsync(amount, shown, from, to, http, ct); }
+        catch (Exception e) when (PublicApi.IsUnexpectedAnswer(e)) { throw new ServiceUnavailableException(Service); }
+    }
+
+    private static async Task<string> FetchAsync(decimal amount, string shown, string from, string to, HttpClient http, CancellationToken ct)
+    {
         var table = (await PublicApi.GetJsonAsync(http, "https://api.nbp.pl/api/exchangerates/tables/A/?format=json", Service, ct))[0];
         var rates = new Dictionary<string, decimal> { ["PLN"] = 1m };
         foreach (var r in table.GetProperty("rates").EnumerateArray())

@@ -49,4 +49,12 @@ public class CurrencyToolTests
         Assert.Equal("50 PLN = 50.00 PLN", await Convert(50, "PLN", "PLN", stub));
         Assert.Empty(stub.Requests);
     }
+
+    [Theory]
+    [InlineData("[]")]
+    [InlineData("{}")]
+    [InlineData("""[{"no":"1","effectiveDate":"2026-11-20","rates":[{"code":"USD","mid":null}]}]""")]
+    public async Task Unexpected_json_maps_to_not_available(string body) =>
+        await Assert.ThrowsAsync<ServiceUnavailableException>(
+            () => Convert(100, "USD", "PLN", new StubHttpHandler(_ => StubHttpHandler.Json(body))));
 }

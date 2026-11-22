@@ -19,6 +19,8 @@ internal static class PublicApi
         {
             using var response = await http.GetAsync(url, ct);
             if (response.StatusCode == HttpStatusCode.NotFound) throw new PublicApiNotFoundException(service);
+            if (response.StatusCode is HttpStatusCode.BadRequest or HttpStatusCode.UnprocessableEntity)
+                throw new ArgumentException($"{service} rejected the input. Change it and try again.");
             if ((int)response.StatusCode >= 500) throw new ServiceUnavailableException(service);
             response.EnsureSuccessStatusCode();
             await using var body = await response.Content.ReadAsStreamAsync(ct);
@@ -34,4 +36,10 @@ internal static class PublicApi
             throw new ServiceUnavailableException(service);
         }
     }
+
+    // True for errors that mean the service answered in a shape we do not expect
+    // (missing or null property, empty array, 404 on a fixed URL). Tools map them to "not available".
+    public static bool IsUnexpectedAnswer(Exception e) =>
+        e is KeyNotFoundException or InvalidOperationException or IndexOutOfRangeException
+            or FormatException or PublicApiNotFoundException;
 }
