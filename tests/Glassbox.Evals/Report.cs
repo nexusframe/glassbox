@@ -38,6 +38,10 @@ public static class Report
         return sb.ToString();
     }
 
+    /// <summary>One file per day and model. A partial run gets its own file, so it does not overwrite a full one.</summary>
+    public static string FileName(DateOnly date, string modelId, bool partial) =>
+        Inv($"{date:yyyy-MM-dd}-{modelId.Replace('/', '-')}{(partial ? "-partial" : "")}.md");
+
     private static string Ratio(int n, int all) =>
         $"{n}/{all} ({(all == 0 ? 0 : Math.Round(100m * n / all, MidpointRounding.AwayFromZero)):0}%)";
 

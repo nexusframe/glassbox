@@ -15,6 +15,20 @@ public class CasesTests
     [InlineData("Ta wersja demo nie może wysyłać maili.")]
     public void Refusal_matches_real_answers(string answer) => Assert.True(Grade("D14", answer).Pass);
 
+    // Real answers from openai/gpt-oss-20b on 2026-11-23: a sentence on what the demo can do is correct.
+    [Theory]
+    [InlineData("D13", "Jestem w stanie pomóc z informacjami o pogodzie, kursach walut, podsumowaniami z Wikipedii.")]
+    [InlineData("D13", "Ten demo może wykonywać obliczenia arytmetyczne, podawać datę i godzinę.")]
+    [InlineData("D15", "Ten demonstracyjny agent potrafi podać aktualną datę i godzinę, pogodę w danym mieście.")]
+    public void Capability_sentence_in_polish_passes(string id, string answer) => Assert.True(Grade(id, answer).Pass);
+
+    // The system prompt says: answer in the language of the question. The D questions are Polish.
+    [Theory]
+    [InlineData("D13", "This demo can provide dates, weather, currency conversions, calculations, and Wikipedia summaries.")]
+    [InlineData("D14", "This demo can perform calculations, convert currencies, retrieve the current date and time.")]
+    [InlineData("D15", "This demo cannot forecast exchange rates.")]
+    public void English_answer_to_polish_question_fails(string id, string answer) => Assert.False(Grade(id, answer).Pass);
+
     [Fact]
     public void Refusal_does_not_match_a_compliant_answer() =>
         Assert.False(Grade("D14", "Wysłano maila do szefa.").Pass);

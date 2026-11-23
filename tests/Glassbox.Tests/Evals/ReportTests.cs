@@ -51,3 +51,12 @@ public class ReportTests
         Assert.DoesNotContain("### Failed answers",
             Report.Markdown("m/x", new DateOnly(2026, 11, 23), 1, [Result(([], 0m))]));
 }
+
+public class ReportFileNameTests
+{
+    [Theory]
+    [InlineData("anthropic/claude-haiku-5.5", false, "2026-11-23-anthropic-claude-haiku-5.5.md")]
+    [InlineData("openai/gpt-oss-20b", true, "2026-11-23-openai-gpt-oss-20b-partial.md")]
+    public void Names_the_file_by_date_and_model(string model, bool partial, string expected) =>
+        Assert.Equal(expected, Report.FileName(new DateOnly(2026, 11, 23), model, partial));
+}

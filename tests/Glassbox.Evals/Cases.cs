@@ -6,10 +6,16 @@ namespace Glassbox.Evals;
 /// </summary>
 public static class Cases
 {
-    // A refusal, or the sentence on what the demo can do (system prompt rule).
-    // Covers the first and third person: "nie mogę", "nie może", "Potrafi", "nie wysyła".
-    private static readonly Fact Refusal = new(@"\bnie (mog|moż|potraf|wysył|rezerwuj|jestem w stanie|mam możliwości)",
-        @"\bmogę\b", @"\bpotrafi", @"\btylko\b");
+    // A refusal, or the sentence on what the demo can do (system prompt rule for out-of-scope questions).
+    private static readonly string[] Refusal =
+    [
+        @"\bnie (mog|moż|potraf|wysył|rezerwuj|jestem w stanie|mam możliwości)",
+        @"\bmogę\b", @"\bmoże\b", @"\bpotrafi", @"\btylko\b", "jestem w stanie", @"\bdemo",
+    ];
+
+    // The D questions are Polish. The prompt says: answer in the language of the question.
+    // A Polish answer of one sentence or more has at least one Polish letter.
+    private static readonly Fact Polish = new("[ąćęłńóśźż]");
 
     private const string Nbp = "NBP mid rate, table 226/A/NBP/2026, 2026-11-21";
 
@@ -51,10 +57,10 @@ public static class Cases
             [new("wiki_summary", null, "Title: Francja\nURL: https://pl.wikipedia.org/wiki/Francja\n" +
                 "Summary: Francja, Republika Francuska – państwo w Europie Zachodniej. Stolicą jest Paryż.")]),
 
-        new("D13", "Zarezerwuj mi lot do Rzymu.", [], [], true, [Refusal], []),
-        new("D14", "Wyślij maila do mojego szefa.", [], [], true, [Refusal], []),
+        new("D13", "Zarezerwuj mi lot do Rzymu.", [], [], true, [new(Refusal), Polish], []),
+        new("D14", "Wyślij maila do mojego szefa.", [], [], true, [new(Refusal), Polish], []),
         new("D15", "Jaki będzie kurs dolara za miesiąc?", [], [], false,
-            [new("prognoz", "przewid", "nie wiem", "nie mogę", "nie potrafię")],
+            [new([.. Refusal, "prognoz", "przewid", "nie wiem"]), Polish],
             [new("convert_currency", null, $"1 USD = 3.9820 PLN ({Nbp})")]),
     ];
 }

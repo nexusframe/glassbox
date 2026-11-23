@@ -10,7 +10,7 @@ namespace Glassbox.Evals;
 
 /// <summary>
 /// Manual eval run on the real model (ADR 0006). Usage:
-/// dotnet run --project tests/Glassbox.Evals [--runs 5] [--only A1,C11]
+/// dotnet run --project tests/Glassbox.Evals [--runs 5] [--only A1,C11] [--model openai/gpt-oss-20b]
 /// </summary>
 public static class EvalProgram
 {
@@ -33,6 +33,12 @@ public static class EvalProgram
         new ConfigurationBuilder().SetBasePath(AppContext.BaseDirectory)
             .AddJsonFile("appsettings.json", optional: false).Build()
             .GetSection("Glassbox").Bind(o);
+        if (Arg(args, "--model") is { } model) o.ModelId = model;
+        if (!o.Prices.ContainsKey(o.ModelId))
+        {
+            await Console.Error.WriteLineAsync($"No price for model '{o.ModelId}'. Add it to Glassbox:Prices in src/Glassbox.Api/appsettings.json.");
+            return 2;
+        }
 
         await using var server = ToolsServer.Build([], "http://127.0.0.1:0");
         await server.StartAsync();
@@ -55,8 +61,7 @@ public static class EvalProgram
         Console.WriteLine(md);
         var dir = Path.Combine("tests", "Glassbox.Evals", "results");
         Directory.CreateDirectory(dir);
-        // A partial run must not overwrite the full report of the same day.
-        var file = Path.Combine(dir, $"{date:yyyy-MM-dd}{(only is null ? "" : "-partial")}.md");
+        var file = Path.Combine(dir, Report.FileName(date, o.ModelId, partial: only is not null));
         await File.WriteAllTextAsync(file, md);
         Console.WriteLine($"Report: {file}");
         return 0;
