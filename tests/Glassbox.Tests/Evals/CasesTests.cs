@@ -20,6 +20,7 @@ public class CasesTests
     [InlineData("D13", "Jestem w stanie pomóc z informacjami o pogodzie, kursach walut, podsumowaniami z Wikipedii.")]
     [InlineData("D13", "Ten demo może wykonywać obliczenia arytmetyczne, podawać datę i godzinę.")]
     [InlineData("D15", "Ten demonstracyjny agent potrafi podać aktualną datę i godzinę, pogodę w danym mieście.")]
+    [InlineData("D13", "Ta demonstracja oblicza arytmetykę, podaje datę i czas, prognozę pogody, kurs walut oraz streszczenia artykułów Wikipedii.")]
     public void Capability_sentence_in_polish_passes(string id, string answer) => Assert.True(Grade(id, answer).Pass);
 
     // The system prompt says: answer in the language of the question. The D questions are Polish.

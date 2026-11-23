@@ -13,6 +13,8 @@ public static class Cases
         @"\bnie (mog|moż|potraf|wysył|rezerwuj|jestem w stanie|mam możliwości)",
         @"\b(mogę|może|potrafi|potrafię|jestem w stanie) (pomóc|sprawdzić|podać|przeliczyć|obliczyć|wykonywać|wykonać)",
         @"\btylko\b.{0,40}(narzędzi|pogod|walut|oblicz)",
+        // "Ta demonstracja oblicza ..., podaje ...": the demo as subject, a capability verb close after it.
+        @"\b(demo\w*|agent\w*|aplikacj\w*|wersj\w*)\b.{0,40}\b(oblicza|podaje|przelicza|sprawdza|wykonuje|może|potrafi)\b",
     ];
 
     // The D questions are Polish. The prompt says: answer in the language of the question.
