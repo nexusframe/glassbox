@@ -30,4 +30,24 @@ public class ReportTests
         var md = Report.Markdown("m/x", new DateOnly(2026, 11, 23), 1, [Result((["missing fact: a | b"], 0m))]);
         Assert.Contains(@"missing fact: a \| b (1)", md);
     }
+
+    [Fact]
+    public void Lists_failed_answers_with_run_number()
+    {
+        var c = new CaseResult(C11,
+            [new RunRecord(RunOutcome.Answered, "4", ["calculate"], 0m),
+             new RunRecord(RunOutcome.Answered, "Cztery.\nTo proste.", [], 0m),
+             new RunRecord(RunOutcome.Timeout, null, [], 0m)],
+            [new Grade([]), new Grade(["from memory: calculate"]), new Grade(["run: Timeout"])]);
+        var md = Report.Markdown("m/x", new DateOnly(2026, 11, 23), 3, [c]);
+        Assert.Contains("### Failed answers", md);
+        Assert.Contains("- C11 run 2: Cztery. To proste.", md);
+        Assert.Contains("- C11 run 3: (no answer)", md);
+        Assert.DoesNotContain("C11 run 1:", md);
+    }
+
+    [Fact]
+    public void Omits_failed_answers_when_all_pass() =>
+        Assert.DoesNotContain("### Failed answers",
+            Report.Markdown("m/x", new DateOnly(2026, 11, 23), 1, [Result(([], 0m))]));
 }

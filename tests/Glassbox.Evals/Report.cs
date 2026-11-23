@@ -27,13 +27,24 @@ public static class Report
                 .Select(g => $"{g.Key} ({g.Count()})");
             sb.AppendLine($"| {r.Case.Id} | {Cell(r.Case.Input)} | {r.Grades.Count(g => g.Pass)}/{r.Grades.Count} | {Cell(string.Join("; ", reasons))} |");
         }
+        // The answers of failed runs. Reason: a reader must see if the model or the pattern is wrong.
+        var failed = results.SelectMany(r => r.Grades.Select((g, i) => (r, g, i)).Where(x => !x.g.Pass)).ToList();
+        if (failed.Count > 0)
+        {
+            sb.AppendLine().AppendLine("### Failed answers").AppendLine();
+            foreach (var (r, _, i) in failed)
+                sb.AppendLine($"- {r.Case.Id} run {i + 1}: {OneLine(r.Runs[i].Answer ?? "(no answer)")}");
+        }
         return sb.ToString();
     }
 
     private static string Ratio(int n, int all) =>
         $"{n}/{all} ({(all == 0 ? 0 : Math.Round(100m * n / all, MidpointRounding.AwayFromZero)):0}%)";
 
-    private static string Cell(string text) => text.Replace("|", @"\|").Replace("\n", " ");
+    private static string Cell(string text) => OneLine(text).Replace("|", @"\|");
+
+    private static string OneLine(string text) =>
+        string.Join(' ', text.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries));
 
     private static string Inv(FormattableString s) => s.ToString(CultureInfo.InvariantCulture);
 }

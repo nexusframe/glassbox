@@ -55,7 +55,8 @@ public static class EvalProgram
         Console.WriteLine(md);
         var dir = Path.Combine("tests", "Glassbox.Evals", "results");
         Directory.CreateDirectory(dir);
-        var file = Path.Combine(dir, $"{date:yyyy-MM-dd}.md");
+        // A partial run must not overwrite the full report of the same day.
+        var file = Path.Combine(dir, $"{date:yyyy-MM-dd}{(only is null ? "" : "-partial")}.md");
         await File.WriteAllTextAsync(file, md);
         Console.WriteLine($"Report: {file}");
         return 0;

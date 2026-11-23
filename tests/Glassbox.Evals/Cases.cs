@@ -6,8 +6,10 @@ namespace Glassbox.Evals;
 /// </summary>
 public static class Cases
 {
-    private static readonly Fact Refusal = new("nie mogę", "nie potrafię", "nie jestem w stanie",
-        "nie mam możliwości", "tylko", "potrafię");
+    // A refusal, or the sentence on what the demo can do (system prompt rule).
+    // Covers the first and third person: "nie mogę", "nie może", "Potrafi", "nie wysyła".
+    private static readonly Fact Refusal = new(@"\bnie (mog|moż|potraf|wysył|rezerwuj|jestem w stanie|mam możliwości)",
+        @"\bmogę\b", @"\bpotrafi", @"\btylko\b");
 
     private const string Nbp = "NBP mid rate, table 226/A/NBP/2026, 2026-11-21";
 
