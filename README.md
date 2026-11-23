@@ -67,3 +67,29 @@ A public instance must name its data controller (RODO/GDPR): set `GLASSBOX_OPERA
 ## How it is built
 
 The code is written with AI coding agents; I read, review and accept every change, and I decide the direction. The ADRs in `docs/` show that work.
+
+## Evals
+
+The evals measure the real model, not the loop. Each of 15 cases has an input, the tools the model must call and the facts the answer must contain. The model gets the production prompt and tool specs. Tool results come from fixed recordings, so the expected facts stay fixed; `calculate` runs for real. Facts are regex patterns, not an LLM judge. Each case runs 5 times. Reason for the split from the CI tests: [ADR 0006](docs/decisions/0006-contract-tests-and-evals.md).
+
+Results on 2026-11-23, 75 runs per model:
+
+| Metric | `anthropic/claude-haiku-5.5` (production) | `openai/gpt-oss-20b` |
+|---|---|---|
+| Pass rate | 75/75 (100%) | 68/75 (91%) |
+| Tool choice | 75/75 (100%) | 74/75 (99%) |
+| Facts present | 75/75 (100%) | 69/75 (92%) |
+| Stable cases | 15/15 | 11/15 |
+| Cost of the run | 0.027 USD | 0.003 USD |
+
+What the cheaper model gets wrong: 6 of 15 out-of-scope answers are in English, but the questions are Polish. One run of the two-city weather case ended with no answer. The tool choice stays almost perfect.
+
+Limit: 15 cases is a small set. Haiku passes all of them, so the set does not yet find its edge. Full reports: [Haiku](tests/Glassbox.Evals/results/2026-11-23-anthropic-claude-haiku-5.5.md), [gpt-oss-20b](tests/Glassbox.Evals/results/2026-11-23-openai-gpt-oss-20b.md).
+
+Run it (manual, it costs money):
+
+```bash
+OPENROUTER_API_KEY=... dotnet run --project tests/Glassbox.Evals          # all cases, 5 runs
+OPENROUTER_API_KEY=... dotnet run --project tests/Glassbox.Evals --only D14 --runs 3
+OPENROUTER_API_KEY=... dotnet run --project tests/Glassbox.Evals --model openai/gpt-oss-20b
+```
