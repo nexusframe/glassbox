@@ -6,6 +6,7 @@
     <Project Path="src/Glassbox.Tools.Mcp/Glassbox.Tools.Mcp.csproj" />
   </Folder>
   <Folder Name="/tests/">
+    <Project Path="tests/Glassbox.Evals/Glassbox.Evals.csproj" />
     <Project Path="tests/Glassbox.Tests/Glassbox.Tests.csproj" />
   </Folder>
 </Solution>

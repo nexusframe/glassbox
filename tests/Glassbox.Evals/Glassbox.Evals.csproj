@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Glassbox.Domain\Glassbox.Domain.csproj" />
+    <ProjectReference Include="..\..\src\Glassbox.Adapters\Glassbox.Adapters.csproj" />
+    <ProjectReference Include="..\..\src\Glassbox.Tools.Mcp\Glassbox.Tools.Mcp.csproj" />
+    <ProjectReference Include="..\..\src\Glassbox.Api\Glassbox.Api.csproj" Aliases="api" />
+  </ItemGroup>
+</Project>

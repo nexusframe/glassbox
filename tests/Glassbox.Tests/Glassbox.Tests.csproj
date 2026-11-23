@@ -16,5 +16,6 @@
     <PackageReference Include="Microsoft.Extensions.AI.Abstractions" />
     <ProjectReference Include="..\..\src\Glassbox.Api\Glassbox.Api.csproj" Aliases="api" />
     <ProjectReference Include="..\..\src\Glassbox.Tools.Mcp\Glassbox.Tools.Mcp.csproj" />
+    <ProjectReference Include="..\Glassbox.Evals\Glassbox.Evals.csproj" />
   </ItemGroup>
 </Project>
