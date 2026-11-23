@@ -10,6 +10,9 @@ public sealed record Grade(IReadOnlyList<string> Reasons)
     public const string NoToolsExpected = "no tools expected: ";
     public const string MissingFact = "missing fact: ";
 
+    /// <summary>False when the run ended without an answer (error, timeout, turn limit).</summary>
+    public bool Answered { get; init; } = true;
+
     public bool Pass => Reasons.Count == 0;
 
     public bool ToolsOk => !Reasons.Any(r =>
@@ -26,17 +29,17 @@ public static class Grader
 
     public static Grade Grade(EvalCase c, RunRecord r)
     {
+        // A run without an answer made no full tool choice: report only the run outcome.
+        if (r.Outcome != RunOutcome.Answered)
+            return new Grade([$"run: {r.Outcome}"]) { Answered = false };
         var reasons = new List<string>();
-        if (r.Outcome != RunOutcome.Answered) reasons.Add($"run: {r.Outcome}");
         var called = r.ToolsCalled.Distinct().ToList();
         reasons.AddRange(c.Required.Where(t => !called.Contains(t)).Select(t => Evals.Grade.FromMemory + t));
         reasons.AddRange(c.Forbidden.Where(called.Contains).Select(t => Evals.Grade.Forbidden + t));
         if (c.NoTools && called.Count > 0) reasons.Add(Evals.Grade.NoToolsExpected + string.Join(", ", called));
-        // Facts need an answer. A run without an answer already fails above.
-        if (r.Outcome == RunOutcome.Answered)
-            reasons.AddRange(c.Facts
-                .Where(f => !f.Patterns.Any(p => Regex.IsMatch(r.Answer ?? "", p, Options)))
-                .Select(f => Evals.Grade.MissingFact + string.Join(" | ", f.Patterns)));
+        reasons.AddRange(c.Facts
+            .Where(f => !f.Patterns.Any(p => Regex.IsMatch(r.Answer ?? "", p, Options)))
+            .Select(f => Evals.Grade.MissingFact + string.Join(" | ", f.Patterns)));
         return new Grade(reasons);
     }
 }

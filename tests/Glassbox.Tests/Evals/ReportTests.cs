@@ -24,6 +24,20 @@ public class ReportTests
         Assert.Contains("| C11 | Ile to 2+2? | 1/2 | from memory: calculate (1) |", md);
     }
 
+    // Tool choice and facts count only runs with an answer. Run errors get their own row.
+    [Fact]
+    public void Excludes_run_errors_from_tool_and_fact_metrics()
+    {
+        var c = new CaseResult(C11,
+            [new RunRecord(RunOutcome.Answered, "4", ["calculate"], 0m), new RunRecord(RunOutcome.Error, null, [], 0m)],
+            [new Grade([]), new Grade(["run: Error"]) { Answered = false }]);
+        var md = Report.Markdown("m/x", new DateOnly(2026, 11, 23), 2, [c]);
+        Assert.Contains("| Pass rate | 1/2 (50%) |", md);
+        Assert.Contains("| Tool choice | 1/1 (100%) |", md);
+        Assert.Contains("| Facts present | 1/1 (100%) |", md);
+        Assert.Contains("| Run errors | 1/2 |", md);
+    }
+
     [Fact]
     public void Escapes_pipes_in_cells()
     {

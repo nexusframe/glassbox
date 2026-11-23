@@ -54,4 +54,14 @@ public class GraderTests
     public void Run_without_answer_fails_and_skips_facts() =>
         Assert.Equal(["run: Timeout"],
             Grader.Grade(Case(facts: new Fact("x")), new RunRecord(RunOutcome.Timeout, null, [], 0m)).Reasons);
+
+    // A run that ends with an error made no tool choice: report only the run error.
+    [Fact]
+    public void Run_error_adds_no_tool_reasons()
+    {
+        var g = Grader.Grade(Case(["calculate"], noTools: false, facts: new Fact("x")),
+            new RunRecord(RunOutcome.Error, null, [], 0m));
+        Assert.Equal(["run: Error"], g.Reasons);
+        Assert.False(g.Answered);
+    }
 }

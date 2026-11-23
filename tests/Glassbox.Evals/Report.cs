@@ -17,8 +17,11 @@ public static class Report
         sb.AppendLine();
         sb.AppendLine("| Metric | Value |").AppendLine("|---|---|");
         sb.AppendLine($"| Pass rate | {Ratio(grades.Count(g => g.Pass), all)} |");
-        sb.AppendLine($"| Tool choice | {Ratio(grades.Count(g => g.ToolsOk), all)} |");
-        sb.AppendLine($"| Facts present | {Ratio(grades.Count(g => g.FactsOk), all)} |");
+        // Tool choice and facts count only runs with an answer: a run error says nothing about them.
+        var answered = grades.Where(g => g.Answered).ToList();
+        sb.AppendLine($"| Tool choice | {Ratio(answered.Count(g => g.ToolsOk), answered.Count)} |");
+        sb.AppendLine($"| Facts present | {Ratio(answered.Count(g => g.FactsOk), answered.Count)} |");
+        sb.AppendLine($"| Run errors | {all - answered.Count}/{all} |");
         sb.AppendLine($"| Stable cases | {results.Count(r => r.Grades.All(g => g.Pass))}/{results.Count} |");
         sb.AppendLine();
         sb.AppendLine("| Case | Input | Pass | Failure reasons |").AppendLine("|---|---|---|---|");

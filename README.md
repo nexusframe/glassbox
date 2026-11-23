@@ -80,6 +80,7 @@ Results on 2026-11-23, 75 runs per model:
 | Tool choice | 75/75 (100%) | 72/75 (96%) |
 | Facts present | 75/75 (100%) | 65/75 (87%) |
 | Stable cases | 15/15 | 10/15 |
+| Run errors | 0/75 | 0/75 |
 | Cost of the run | 0.027 USD | 0.003 USD |
 
 What the cheaper model gets wrong: 7 of 15 out-of-scope answers are in English, but the questions are Polish. In 2 of 5 runs of "weather and time in Paris" it skips `get_datetime` and gives the time of the weather reading. Once it computes 15% of 200 without `calculate`, and once it gives a wrong Tokyo time after the tool call.
