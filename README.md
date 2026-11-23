@@ -76,13 +76,13 @@ Results on 2026-11-23, 75 runs per model:
 
 | Metric | `anthropic/claude-haiku-5.5` (production) | `openai/gpt-oss-20b` |
 |---|---|---|
-| Pass rate | 75/75 (100%) | 68/75 (91%) |
-| Tool choice | 75/75 (100%) | 74/75 (99%) |
-| Facts present | 75/75 (100%) | 69/75 (92%) |
-| Stable cases | 15/15 | 11/15 |
+| Pass rate | 75/75 (100%) | 64/75 (85%) |
+| Tool choice | 75/75 (100%) | 72/75 (96%) |
+| Facts present | 75/75 (100%) | 65/75 (87%) |
+| Stable cases | 15/15 | 10/15 |
 | Cost of the run | 0.027 USD | 0.003 USD |
 
-What the cheaper model gets wrong: 6 of 15 out-of-scope answers are in English, but the questions are Polish. One run of the two-city weather case ended with no answer. The tool choice stays almost perfect.
+What the cheaper model gets wrong: 7 of 15 out-of-scope answers are in English, but the questions are Polish. In 2 of 5 runs of "weather and time in Paris" it skips `get_datetime` and gives the time of the weather reading. Once it computes 15% of 200 without `calculate`, and once it gives a wrong Tokyo time after the tool call.
 
 Limit: 15 cases is a small set. Haiku passes all of them, so the set does not yet find its edge. Full reports: [Haiku](tests/Glassbox.Evals/results/2026-11-23-anthropic-claude-haiku-5.5.md), [gpt-oss-20b](tests/Glassbox.Evals/results/2026-11-23-openai-gpt-oss-20b.md).
 

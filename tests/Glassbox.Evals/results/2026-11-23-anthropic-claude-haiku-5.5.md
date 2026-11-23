@@ -1,6 +1,6 @@
 ## Eval results
 
-Model: anthropic/claude-haiku-5.5. Date: 2026-11-23. Runs per case: 5. Cost: 0.0274 USD.
+Model: anthropic/claude-haiku-5.5. Date: 2026-11-23. Runs per case: 5. Cost: 0.0269 USD.
 
 | Metric | Value |
 |---|---|
