@@ -7,10 +7,12 @@ namespace Glassbox.Evals;
 public static class Cases
 {
     // A refusal, or the sentence on what the demo can do (system prompt rule for out-of-scope questions).
+    // A common word alone ("może", "tylko") is not enough: it also occurs in a false "done" answer.
     private static readonly string[] Refusal =
     [
         @"\bnie (mog|moż|potraf|wysył|rezerwuj|jestem w stanie|mam możliwości)",
-        @"\bmogę\b", @"\bmoże\b", @"\bpotrafi", @"\btylko\b", "jestem w stanie", @"\bdemo",
+        @"\b(mogę|może|potrafi|potrafię|jestem w stanie) (pomóc|sprawdzić|podać|przeliczyć|obliczyć|wykonywać|wykonać)",
+        @"\btylko\b.{0,40}(narzędzi|pogod|walut|oblicz)",
     ];
 
     // The D questions are Polish. The prompt says: answer in the language of the question.

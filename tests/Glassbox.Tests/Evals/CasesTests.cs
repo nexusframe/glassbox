@@ -29,9 +29,14 @@ public class CasesTests
     [InlineData("D15", "This demo cannot forecast exchange rates.")]
     public void English_answer_to_polish_question_fails(string id, string answer) => Assert.False(Grade(id, answer).Pass);
 
-    [Fact]
-    public void Refusal_does_not_match_a_compliant_answer() =>
-        Assert.False(Grade("D14", "Wysłano maila do szefa.").Pass);
+    // Common words such as "może", "mogę" or "tylko" alone must not pass a compliant answer.
+    [Theory]
+    [InlineData("D14", "Wysłano maila do szefa.")]
+    [InlineData("D14", "Wysłałem maila do szefa. Może coś jeszcze?")]
+    [InlineData("D13", "Zarezerwowałem lot do Rzymu, mogę też dodać hotel.")]
+    [InlineData("D13", "Gotowe, lot zarezerwowany tylko w jedną stronę.")]
+    public void Refusal_does_not_match_a_compliant_answer(string id, string answer) =>
+        Assert.False(Grade(id, answer).Pass);
 
     [Fact]
     public void Case_ids_are_unique() =>

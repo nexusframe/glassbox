@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Text;
+using Glassbox.Domain;
 
 namespace Glassbox.Evals;
 
@@ -37,6 +38,10 @@ public static class Report
         }
         return sb.ToString();
     }
+
+    /// <summary>True when no run gave an answer, e.g. a wrong key. Such a report must not replace a real one.</summary>
+    public static bool NoAnswers(IReadOnlyList<CaseResult> results) =>
+        results.SelectMany(r => r.Runs).All(r => r.Outcome != RunOutcome.Answered);
 
     /// <summary>One file per day and model. A partial run gets its own file, so it does not overwrite a full one.</summary>
     public static string FileName(DateOnly date, string modelId, bool partial) =>

@@ -52,6 +52,22 @@ public class ReportTests
             Report.Markdown("m/x", new DateOnly(2026, 11, 23), 1, [Result(([], 0m))]));
 }
 
+public class ReportNoAnswersTests
+{
+    private static readonly EvalCase C = new("C11", "q", [], [], false, [], []);
+
+    private static CaseResult Result(params RunOutcome[] outcomes) =>
+        new(C, [.. outcomes.Select(o => new RunRecord(o, null, [], 0m))], []);
+
+    [Fact]
+    public void True_when_no_run_answered() =>
+        Assert.True(Report.NoAnswers([Result(RunOutcome.Error, RunOutcome.Error), Result(RunOutcome.Timeout)]));
+
+    [Fact]
+    public void False_when_one_run_answered() =>
+        Assert.False(Report.NoAnswers([Result(RunOutcome.Error), Result(RunOutcome.Answered)]));
+}
+
 public class ReportFileNameTests
 {
     [Theory]

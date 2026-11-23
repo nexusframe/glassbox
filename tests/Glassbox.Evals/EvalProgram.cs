@@ -55,6 +55,13 @@ public static class EvalProgram
             Console.WriteLine($"{c.Id} {r.Grades.Count(g => g.Pass)}/{runs}");
         }
 
+        // No answer at all (e.g. a wrong key): do not replace a real report with a 0% one.
+        if (Report.NoAnswers(results))
+        {
+            await Console.Error.WriteLineAsync("No run gave an answer. Check the key and the model id. No report written.");
+            return 1;
+        }
+
         var date = DateOnly.FromDateTime(DateTime.UtcNow);
         var md = Report.Markdown(o.ModelId, date, runs, results);
         Console.WriteLine();
