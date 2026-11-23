@@ -97,12 +97,17 @@ public sealed class LazyOpenRouterCompleter(IConfiguration config, IOptionsMonit
             if (_inner is not null) return _inner;
             var key = config[Program.KeyName];
             if (string.IsNullOrWhiteSpace(key)) throw new InvalidOperationException("OPENROUTER_API_KEY is not set.");
-            var o = options.CurrentValue;
-            IChatClient client = new OpenAIClient(new ApiKeyCredential(key),
-                    new OpenAIClientOptions { Endpoint = new Uri(o.ModelBaseUrl) })
-                .GetChatClient(o.ModelId).AsIChatClient();
-            return _inner = new RetryOnceCompleter(new ChatClientCompleter(client, o.ModelId, o.MaxOutputTokens));
+            return _inner = Create(key, options.CurrentValue);
         }
+    }
+
+    /// <summary>Builds the model client. The evals use it too, so they measure the production client.</summary>
+    public static IComplete Create(string key, GlassboxOptions o)
+    {
+        IChatClient client = new OpenAIClient(new ApiKeyCredential(key),
+                new OpenAIClientOptions { Endpoint = new Uri(o.ModelBaseUrl) })
+            .GetChatClient(o.ModelId).AsIChatClient();
+        return new RetryOnceCompleter(new ChatClientCompleter(client, o.ModelId, o.MaxOutputTokens));
     }
 }
 
