@@ -6,7 +6,7 @@ namespace Glassbox.Tests;
 
 public class WeatherToolTests
 {
-    private const string Place = """{"results":[{"name":"Kraków","country":"Poland","latitude":50.06,"longitude":19.94}]}""";
+    private const string Place = """{"results":[{"name":"Kraków","country":"Polska","country_code":"PL","latitude":50.06,"longitude":19.94}]}""";
 
     private static string Forecast(int code = 3) =>
         $$$"""{"current":{"time":"2026-11-22T23:15","temperature_2m":1.3,"weather_code":{{{code}}},"wind_speed_10m":6.8}}""";
@@ -19,7 +19,7 @@ public class WeatherToolTests
     {
         var stub = Stub(Place, Forecast());
         var result = await WeatherTool.CurrentAsync("Kraków", stub.Client(), CancellationToken.None);
-        Assert.Equal("Kraków, Poland: 1.3°C, overcast, wind 6.8 km/h (local time 2026-11-22 23:15)", result);
+        Assert.Equal("Kraków, PL: 1.3°C, overcast, wind 6.8 km/h (local time 2026-11-22 23:15)", result);
     }
 
     [Fact]

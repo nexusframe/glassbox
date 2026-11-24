@@ -29,7 +29,7 @@ public static class Cases
         new("A2", "What time is it in Tokyo?", ["get_datetime"], [], false, [new("18:42")],
             [new("get_datetime", "Tokyo", "2026-11-23 18:42, Monday, UTC+09:00 (Asia/Tokyo)")]),
         new("A3", "Jaka jest pogoda w Krakowie?", ["get_weather"], [], false, [new(@"2[,.]5")],
-            [new("get_weather", null, "Kraków, Polska: 2.5°C, overcast, wind 11.2 km/h (local time 2026-11-23 10:00)")]),
+            [new("get_weather", null, "Kraków, PL: 2.5°C, overcast, wind 11.2 km/h (local time 2026-11-23 10:00)")]),
         new("A4", "Ile to 100 USD w złotówkach?", ["convert_currency"], [], false, [new(@"398[,.]2")],
             [new("convert_currency", null, $"100 USD = 398.20 PLN ({Nbp})")]),
         new("A5", "Who was Maria Skłodowska-Curie?", ["wiki_summary"], [], false, [new("Nobel")],
@@ -40,7 +40,7 @@ public static class Cases
         new("B6", "Jaka jest pogoda i która godzina w Paryżu?", ["get_weather", "get_datetime"], [], false,
             [new(@"8[,.]1"), new("11:05")],
             [
-                new("get_weather", null, "Paris, Francja: 8.1°C, light rain, wind 19.4 km/h (local time 2026-11-23 11:00)"),
+                new("get_weather", null, "Paryż, FR: 8.1°C, light rain, wind 19.4 km/h (local time 2026-11-23 11:00)"),
                 new("get_datetime", null, "2026-11-23 11:05, Monday, UTC+01:00 (Europe/Paris)"),
             ]),
         new("B7", "Ile to 50 EUR w PLN plus 23% VAT?", ["convert_currency", "calculate"], [], false,
@@ -49,8 +49,8 @@ public static class Cases
         new("B8", "O ile stopni cieplej jest w Rzymie niż w Warszawie?", ["get_weather", "calculate"], [], false,
             [new(@"10[,.]5")],
             [
-                new("get_weather", "Warsz|Warsaw", "Warszawa, Polska: 3.5°C, overcast, wind 14.0 km/h (local time 2026-11-23 10:00)"),
-                new("get_weather", "Rzym|Rome|Roma", "Rzym, Włochy: 14°C, clear sky, wind 6.1 km/h (local time 2026-11-23 10:00)"),
+                new("get_weather", "Warsz|Warsaw", "Warszawa, PL: 3.5°C, overcast, wind 14.0 km/h (local time 2026-11-23 10:00)"),
+                new("get_weather", "Rzym|Rome|Roma", "Rzym, IT: 14°C, clear sky, wind 6.1 km/h (local time 2026-11-23 10:00)"),
             ]),
 
         new("C9", "Ile to 15% z 200 zł?", ["calculate"], ["convert_currency"], false, [new(@"\b30\b")], []),

@@ -37,6 +37,8 @@ public static class WeatherTool
 
     private static async Task<string> FetchAsync(string name, HttpClient http, CancellationToken ct)
     {
+        // Search with language=pl. Reason: the language also limits which names match, and
+        // without it "Warszawa" finds only a district in Ohio. "Warsaw" and "Paris" still match.
         var places = await PublicApi.GetJsonAsync(http,
             $"https://geocoding-api.open-meteo.com/v1/search?name={Uri.EscapeDataString(name)}&count=1&language=pl&format=json",
             Service, ct);
@@ -53,7 +55,8 @@ public static class WeatherTool
         var now = forecast.GetProperty("current");
         var code = now.GetProperty("weather_code").GetInt32();
         var sky = Codes.TryGetValue(code, out var text) ? text : $"weather code {code}";
-        var country = place.TryGetProperty("country", out var c) ? $", {c.GetString()}" : "";
+        // Return the ISO country code, not the Polish country name. Reason: the code reads the same in every language.
+        var country = place.TryGetProperty("country_code", out var c) ? $", {c.GetString()}" : "";
         var time = now.GetProperty("time").GetString()?.Replace('T', ' ');
         return string.Create(CultureInfo.InvariantCulture,
             $"{place.GetProperty("name").GetString()}{country}: {now.GetProperty("temperature_2m").GetDouble()}°C, {sky}, wind {now.GetProperty("wind_speed_10m").GetDouble()} km/h (local time {time})");
